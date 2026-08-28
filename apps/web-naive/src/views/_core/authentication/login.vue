@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { VbenFormSchema } from '@vben/common-ui';
+import type { Recordable } from '@vben/types';
 
 import { computed } from 'vue';
 
@@ -11,6 +12,17 @@ import { useAuthStore } from '#/store';
 defineOptions({ name: 'Login' });
 
 const authStore = useAuthStore();
+
+async function handleSubmit(values: Recordable<any>) {
+  try {
+    await authStore.authLogin({
+      password: String(values.password ?? ''),
+      username: String(values.username ?? ''),
+    });
+  } catch {
+    // 请求层已经统一展示后端错误消息，页面事件边界只负责消费异常。
+  }
+}
 
 const formSchema = computed((): VbenFormSchema[] => {
   return [
@@ -45,6 +57,6 @@ const formSchema = computed((): VbenFormSchema[] => {
     :show-qrcode-login="false"
     :show-register="false"
     :show-third-party-login="false"
-    @submit="authStore.authLogin"
+    @submit="handleSubmit"
   />
 </template>

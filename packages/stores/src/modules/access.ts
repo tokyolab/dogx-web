@@ -24,6 +24,10 @@ interface AccessState {
    */
   accessToken: AccessToken;
   /**
+   * accessToken 过期时间（Unix 毫秒）
+   */
+  accessTokenExpiresAt: null | number;
+  /**
    * 是否已经检查过权限
    */
   isAccessChecked: boolean;
@@ -76,6 +80,11 @@ export const useAccessStore = defineStore('core-access', {
     setAccessCodes(codes: string[]) {
       this.accessCodes = codes;
     },
+    clearCredentials() {
+      this.accessToken = null;
+      this.refreshToken = null;
+      this.accessTokenExpiresAt = null;
+    },
     setAccessMenus(menus: MenuRecordRaw[]) {
       this.accessMenus = menus;
     },
@@ -84,6 +93,18 @@ export const useAccessStore = defineStore('core-access', {
     },
     setAccessToken(token: AccessToken) {
       this.accessToken = token;
+    },
+    setCredentials(credentials: {
+      accessToken: string;
+      expiresIn: number;
+      refreshToken: string;
+    }) {
+      this.accessToken = credentials.accessToken;
+      this.refreshToken = credentials.refreshToken;
+      this.accessTokenExpiresAt =
+        credentials.expiresIn > 0
+          ? Date.now() + credentials.expiresIn * 1000
+          : null;
     },
     setIsAccessChecked(isAccessChecked: boolean) {
       this.isAccessChecked = isAccessChecked;
@@ -103,6 +124,7 @@ export const useAccessStore = defineStore('core-access', {
     // 持久化
     pick: [
       'accessToken',
+      'accessTokenExpiresAt',
       'refreshToken',
       'accessCodes',
       'isLockScreen',
@@ -114,6 +136,7 @@ export const useAccessStore = defineStore('core-access', {
     accessMenus: [],
     accessRoutes: [],
     accessToken: null,
+    accessTokenExpiresAt: null,
     isAccessChecked: false,
     isLockScreen: false,
     lockScreenPassword: undefined,

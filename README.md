@@ -15,9 +15,7 @@ pnpm install
 pnpm dev
 ```
 
-默认开发端口为 `5888`。当前保留 Vben 的本地 Mock 服务用于验证基础界面，后续接入 DogX 后端后移除。
-
-临时 Mock 账号：`admin`，密码：`123456`。
+默认开发端口为 `5888`。开发服务器将 `/api` 请求代理到本机 `http://127.0.0.1:8001` 的 DogX System API。仓库暂时保留 Vben Mock 服务源码作为前端开发参考，但默认不启动。
 
 图标采用本地白名单，不在运行时请求 Iconify 公共 API。新增图标时，需要在 `apps/web-naive/src/icons/index.ts` 中导入并注册。
 

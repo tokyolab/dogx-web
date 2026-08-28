@@ -1,4 +1,6 @@
-import type { Recordable, UserInfo } from '@vben/types';
+import type { UserInfo } from '@vben/types';
+
+import type { AuthApi } from '#/api';
 
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -10,7 +12,7 @@ import { resetAllStores, useAccessStore, useUserStore } from '@vben/stores';
 import { defineStore } from 'pinia';
 
 import { notification } from '#/adapter/naive';
-import { getAccessCodesApi, getUserInfoApi, loginApi, logoutApi } from '#/api';
+import { getUserInfoApi, loginApi, logoutApi } from '#/api';
 import { $t } from '#/locales';
 
 export const useAuthStore = defineStore('auth', () => {
@@ -26,30 +28,21 @@ export const useAuthStore = defineStore('auth', () => {
    * @param params 登录表单数据
    */
   async function authLogin(
-    params: Recordable<any>,
+    params: AuthApi.LoginParams,
     onSuccess?: () => Promise<void> | void,
   ) {
     // 异步处理用户登录操作并获取 accessToken
     let userInfo: null | UserInfo = null;
     try {
       loginLoading.value = true;
-      const { accessToken } = await loginApi(params);
+      const credentials = await loginApi(params);
 
       // 如果成功获取到 accessToken
-      if (accessToken) {
-        // 将 accessToken 存储到 accessStore 中
-        accessStore.setAccessToken(accessToken);
+      if (credentials.accessToken) {
+        accessStore.setCredentials(credentials);
+        accessStore.setAccessCodes([]);
 
-        // 获取用户信息并存储到 accessStore 中
-        const [fetchUserInfoResult, accessCodes] = await Promise.all([
-          fetchUserInfo(),
-          getAccessCodesApi(),
-        ]);
-
-        userInfo = fetchUserInfoResult;
-
-        userStore.setUserInfo(userInfo);
-        accessStore.setAccessCodes(accessCodes);
+        userInfo = await fetchUserInfo();
 
         if (accessStore.loginExpired) {
           accessStore.setLoginExpired(false);
@@ -69,6 +62,10 @@ export const useAuthStore = defineStore('auth', () => {
           });
         }
       }
+    } catch (error) {
+      accessStore.clearCredentials();
+      userStore.setUserInfo(null);
+      throw error;
     } finally {
       loginLoading.value = false;
     }
@@ -78,9 +75,14 @@ export const useAuthStore = defineStore('auth', () => {
     };
   }
 
-  async function logout(redirect: boolean = true) {
+  async function logout(
+    redirect: boolean = true,
+    revokeRemote: boolean = true,
+  ) {
     try {
-      await logoutApi();
+      if (revokeRemote && accessStore.accessToken) {
+        await logoutApi();
+      }
     } catch {
       // 不做任何处理
     }

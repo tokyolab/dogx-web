@@ -12,6 +12,11 @@ import { InterceptorManager } from './modules/interceptor';
 import { SSE } from './modules/sse';
 import { FileUploader } from './modules/uploader';
 
+interface RefreshTokenQueueItem {
+  reject: (error: unknown) => void;
+  resolve: (token: string) => void;
+}
+
 function getParamsSerializer(
   paramsSerializer: RequestClientOptions['paramsSerializer'],
 ) {
@@ -47,7 +52,7 @@ class RequestClient {
   public isRefreshing = false;
   public postSSE: SSE['postSSE'];
   // 刷新token队列
-  public refreshTokenQueue: ((token: string) => void)[] = [];
+  public refreshTokenQueue: RefreshTokenQueueItem[] = [];
   public requestSSE: SSE['requestSSE'];
   public upload: FileUploader['upload'];
 
