@@ -36,7 +36,6 @@ overrides:
 catalog:
   '@ast-grep/napi': ^0.42.3
   '@changesets/git': ^3.0.4
-  '@clack/prompts': ^1.4.0
   '@commitlint/cli': ^21.0.1
   '@commitlint/config-conventional': ^21.0.1
   '@ctrl/tinycolor': ^4.2.0
