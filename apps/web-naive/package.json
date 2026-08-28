@@ -1,0 +1,48 @@
+{
+  "name": "@dogx/web",
+  "version": "0.1.0",
+  "homepage": "https://github.com/tokyolab/dogx-web",
+  "bugs": "https://github.com/tokyolab/dogx-web/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tokyolab/dogx-web.git",
+    "directory": "apps/web-naive"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "tokyolab",
+    "url": "https://github.com/tokyolab"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "pnpm vite build --mode production",
+    "build:analyze": "pnpm vite build --mode analyze",
+    "dev": "pnpm vite --mode development",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit --skipLibCheck"
+  },
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "dependencies": {
+    "@vben/access": "workspace:*",
+    "@vben/common-ui": "workspace:*",
+    "@vben/constants": "workspace:*",
+    "@vben/hooks": "workspace:*",
+    "@vben/icons": "workspace:*",
+    "@vben/layouts": "workspace:*",
+    "@vben/locales": "workspace:*",
+    "@vben/plugins": "workspace:*",
+    "@vben/preferences": "workspace:*",
+    "@vben/request": "workspace:*",
+    "@vben/stores": "workspace:*",
+    "@vben/styles": "workspace:*",
+    "@vben/types": "workspace:*",
+    "@vben/utils": "workspace:*",
+    "@vueuse/core": "catalog:",
+    "naive-ui": "catalog:",
+    "pinia": "catalog:",
+    "vue": "catalog:",
+    "vue-router": "catalog:"
+  }
+}
