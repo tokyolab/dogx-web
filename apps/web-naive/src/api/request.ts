@@ -125,6 +125,13 @@ export const baseRequestClient = new RequestClient({
   responseReturn: 'data',
 });
 
+baseRequestClient.addRequestInterceptor({
+  fulfilled: async (config) => {
+    config.headers['Accept-Language'] = preferences.app.locale;
+    return config;
+  },
+});
+
 baseRequestClient.addResponseInterceptor(
   defaultResponseInterceptor({
     codeField: 'code',

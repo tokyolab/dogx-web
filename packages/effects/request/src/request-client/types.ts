@@ -75,6 +75,8 @@ interface HttpResponse<T = any> {
   code: number;
   data: T;
   message: string;
+  /** Stable machine-readable error identifier; empty on success. */
+  subcode: string;
 }
 
 export type {
