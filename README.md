@@ -5,7 +5,7 @@ DogX 的 PC 管理后台前端，基于 Vue、Vben5 和 Naive UI。
 ## 环境要求
 
 - Node.js 22.18.0 及以上的 22.x，或 Node.js 24.x
-- pnpm 10.x
+- pnpm 11.x
 
 ## 本地启动
 
