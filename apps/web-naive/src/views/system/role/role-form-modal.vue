@@ -88,7 +88,8 @@ function createSchema(isUpdate: boolean, isSystem: boolean): VbenFormSchema[] {
       label: $t('page.system.role.description'),
       rules: z
         .string()
-        .max(500, { message: $t('page.system.role.descriptionTooLong') }),
+        .max(500, { message: $t('page.system.role.descriptionTooLong') })
+        .optional(),
     },
     {
       component: 'InputNumber',
