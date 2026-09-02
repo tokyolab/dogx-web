@@ -35,6 +35,7 @@
       "sort": "排序",
       "sortPlaceholder": "请输入排序值",
       "sortHelp": "数值越小越靠前",
+      "sortRequired": "请输入排序值",
       "sortInvalid": "排序必须是大于或等于 0 的整数",
       "status": "状态",
       "type": "类型",

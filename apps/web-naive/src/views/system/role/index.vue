@@ -150,8 +150,22 @@ function openPermissionModal(record: RoleApi.RoleItem) {
   permissionModalApi.setData({ record }).open();
 }
 
+function confirmStatusUpdate(record: RoleApi.RoleItem) {
+  if (record.isSystem || statusUpdatingRoleID.value !== undefined) return false;
+
+  void updateStatus(record).catch(() => undefined);
+  return true;
+}
+
+function confirmRoleDeletion(record: RoleApi.RoleItem) {
+  if (record.isSystem || deletingRoleID.value !== undefined) return false;
+
+  void deleteRole(record).catch(() => undefined);
+  return true;
+}
+
 async function updateStatus(record: RoleApi.RoleItem) {
-  if (record.isSystem) return;
+  if (record.isSystem || statusUpdatingRoleID.value !== undefined) return false;
 
   const status = record.status === 1 ? 0 : 1;
   statusUpdatingRoleID.value = record.id;
@@ -163,19 +177,21 @@ async function updateStatus(record: RoleApi.RoleItem) {
         : $t('page.system.role.disableSuccess'),
     );
     await gridApi.reload();
+    return true;
   } finally {
     statusUpdatingRoleID.value = undefined;
   }
 }
 
 async function deleteRole(record: RoleApi.RoleItem) {
-  if (record.isSystem) return;
+  if (record.isSystem || deletingRoleID.value !== undefined) return false;
 
   deletingRoleID.value = record.id;
   try {
     await deleteRoleApi(record.id);
     message.success($t('page.system.role.deleteSuccess'));
     await gridApi.reload();
+    return true;
   } finally {
     deletingRoleID.value = undefined;
   }
@@ -215,7 +231,7 @@ async function deleteRole(record: RoleApi.RoleItem) {
           v-else
           :negative-text="$t('common.cancel')"
           :positive-text="$t('common.confirm')"
-          @positive-click="updateStatus(row)"
+          @positive-click="confirmStatusUpdate(row)"
         >
           <template #trigger>
             <NSwitch
@@ -279,7 +295,7 @@ async function deleteRole(record: RoleApi.RoleItem) {
                   :negative-text="$t('common.cancel')"
                   :positive-button-props="{ type: 'error' }"
                   :positive-text="$t('common.delete')"
-                  @positive-click="deleteRole(row)"
+                  @positive-click="confirmRoleDeletion(row)"
                 >
                   <template #trigger>
                     <NButton

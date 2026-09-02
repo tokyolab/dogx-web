@@ -103,7 +103,10 @@ function createSchema(isUpdate: boolean, isSystem: boolean): VbenFormSchema[] {
       help: $t('page.system.role.sortHelp'),
       label: $t('page.system.role.sort'),
       rules: z
-        .number()
+        .number({
+          invalid_type_error: $t('page.system.role.sortRequired'),
+          required_error: $t('page.system.role.sortRequired'),
+        })
         .int({ message: $t('page.system.role.sortInvalid') })
         .min(0, { message: $t('page.system.role.sortInvalid') }),
     },
