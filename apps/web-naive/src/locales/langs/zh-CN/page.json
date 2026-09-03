@@ -56,7 +56,7 @@
       "systemStatusHelp": "系统内置角色不可停用",
       "systemDeleteHelp": "系统内置角色不可删除",
       "disabledPermissionHelp": "请先启用角色，再配置接口权限",
-      "superAdminPermissionLabel": "全部权限（系统内置）",
+      "superAdminPermissionLabel": "全部权限",
       "superAdminPermissionHelp": "超级管理员拥有全部权限（系统内置），无需配置接口权限",
       "apiPermission": "接口权限",
       "searchAPIPlaceholder": "搜索接口名称、路径或请求方法",
