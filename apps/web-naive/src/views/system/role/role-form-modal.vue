@@ -72,6 +72,7 @@ function createSchema(isUpdate: boolean, isSystem: boolean): VbenFormSchema[] {
       label: $t('page.system.role.name'),
       rules: z
         .string()
+        .trim()
         .min(1, { message: $t('page.system.role.nameRequired') })
         .max(64, { message: $t('page.system.role.nameTooLong') }),
     },
