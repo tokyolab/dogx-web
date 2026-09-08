@@ -13,6 +13,12 @@ const routes: RouteRecordRaw[] = [
     path: '/system',
     children: [
       {
+        component: () => import('#/views/system/user/index.vue'),
+        meta: { icon: 'lucide:user', title: $t('page.system.user.title') },
+        name: 'UserManagement',
+        path: '/system/user',
+      },
+      {
         component: () => import('#/views/system/role/index.vue'),
         meta: {
           icon: 'lucide:shield-check',

@@ -8,6 +8,7 @@ import { AuthenticationLogin, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
 import { useAuthStore } from '#/store';
+import { isPasswordWithinByteLimit } from '#/utils/password';
 
 defineOptions({ name: 'Login' });
 
@@ -42,7 +43,12 @@ const formSchema = computed((): VbenFormSchema[] => {
       },
       fieldName: 'password',
       label: $t('authentication.password'),
-      rules: z.string().min(1, { message: $t('authentication.passwordTip') }),
+      rules: z
+        .string()
+        .min(1, { message: $t('authentication.passwordTip') })
+        .refine(isPasswordWithinByteLimit, {
+          message: $t('page.auth.passwordTooLong'),
+        }),
     },
   ];
 });
