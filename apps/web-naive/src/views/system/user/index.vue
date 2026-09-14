@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import type { DropdownOption } from 'naive-ui';
 
+import type { VNode } from 'vue';
+
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
 import type { UserApi } from '#/api/system';
 
@@ -18,7 +20,7 @@ import {
   NPopconfirm,
   NSpace,
   NSwitch,
-  NTag,
+  NTooltip,
 } from 'naive-ui';
 
 import { dialog, message } from '#/adapter/naive';
@@ -28,6 +30,7 @@ import { deleteUserApi, listUsersApi, updateUserStatusApi } from '#/api/system';
 import { userActionAvailability } from './user-form';
 import UserFormModal from './user-form-modal.vue';
 import UserPasswordModal from './user-password-modal.vue';
+import UserRoleTags from './user-role-tags.vue';
 import UserRolesModal from './user-roles-modal.vue';
 
 const userStore = useUserStore();
@@ -58,6 +61,8 @@ const gridOptions: VxeTableGridOptions<UserApi.UserItem> = {
     {
       field: 'roles',
       minWidth: 180,
+      // The role tags provide their own hover details instead of VXE's tooltip.
+      showOverflow: 'ellipsis',
       slots: { default: 'roles' },
       title: $t('page.system.user.roles'),
     },
@@ -175,6 +180,28 @@ function moreOptions(record: UserApi.UserItem): DropdownOption[] {
   ];
 }
 
+function renderMoreOption(
+  record: UserApi.UserItem,
+  { node, option }: { node: VNode; option: DropdownOption },
+) {
+  const availability = actions(record);
+  if (option.key !== 'delete' || availability.canDeactivate) return node;
+
+  return h(
+    NTooltip,
+    { placement: 'left' },
+    {
+      default: () =>
+        $t(
+          availability.canAssignRoles
+            ? 'page.system.user.selfDeleteHelp'
+            : 'page.system.user.superAdminDeleteHelp',
+        ),
+      trigger: () => node,
+    },
+  );
+}
+
 function onMoreSelect(key: number | string, record: UserApi.UserItem) {
   if (deletingID.value === record.id) return;
   if (key === 'reset-password' && actions(record).canManage) {
@@ -246,31 +273,31 @@ async function removeUser(record: UserApi.UserItem) {
         </NButton>
       </template>
       <template #roles="{ row }">
-        <NSpace v-if="row.roles.length > 0" :size="4" justify="center">
-          <NTag
-            v-for="role in row.roles"
-            :key="role.id"
-            :bordered="false"
-            :type="role.status === 1 ? 'info' : 'default'"
-            size="small"
-          >
-            {{ role.name }}
-            <span v-if="role.status !== 1">
-              ({{ $t('common.disabled') }})
-            </span>
-          </NTag>
-        </NSpace>
+        <UserRoleTags :roles="row.roles" />
       </template>
       <template #status="{ row }">
+        <NTooltip v-if="!actions(row).canDeactivate">
+          <template #trigger>
+            <NSwitch :value="row.status === 1" disabled />
+          </template>
+          {{
+            $t(
+              actions(row).canAssignRoles
+                ? 'page.system.user.selfStatusHelp'
+                : 'page.system.user.superAdminStatusHelp',
+            )
+          }}
+        </NTooltip>
         <NPopconfirm
-          :disabled="!actions(row).canDeactivate || statusID !== undefined"
+          v-else
+          :disabled="statusID !== undefined"
           :negative-text="$t('common.cancel')"
           :positive-text="$t('common.confirm')"
           @positive-click="confirmStatus(row)"
         >
           <template #trigger>
             <NSwitch
-              :disabled="!actions(row).canDeactivate || statusID !== undefined"
+              :disabled="statusID !== undefined"
               :loading="statusID === row.id"
               :value="row.status === 1"
             />
@@ -287,41 +314,63 @@ async function removeUser(record: UserApi.UserItem) {
       </template>
       <template #operation="{ row }">
         <NSpace :size="4" :wrap="false" justify="center">
-          <NButton
-            :disabled="!actions(row).canManage"
-            quaternary
-            size="small"
-            type="primary"
-            @click="openUser(row.id)"
-          >
-            {{ $t('common.edit') }}
-          </NButton>
-          <NButton
-            :disabled="!actions(row).canAssignRoles"
-            quaternary
-            size="small"
-            type="primary"
-            @click="openRoles(row.id)"
-          >
-            {{ $t('page.system.user.assignRoles') }}
-          </NButton>
-          <NDropdown
-            :disabled="!actions(row).canManage || deletingID === row.id"
-            :options="moreOptions(row)"
-            trigger="click"
-            @select="(key) => onMoreSelect(key, row)"
-          >
-            <NButton
-              :disabled="!actions(row).canManage || deletingID === row.id"
-              :loading="deletingID === row.id"
-              quaternary
-              size="small"
-              type="primary"
-            >
-              {{ $t('page.system.user.more') }}
-              <ChevronDown class="ml-1 size-3" />
-            </NButton>
-          </NDropdown>
+          <NTooltip :disabled="actions(row).canManage">
+            <template #trigger>
+              <span>
+                <NButton
+                  :disabled="!actions(row).canManage"
+                  quaternary
+                  size="small"
+                  type="primary"
+                  @click="openUser(row.id)"
+                >
+                  {{ $t('common.edit') }}
+                </NButton>
+              </span>
+            </template>
+            {{ $t('page.system.user.superAdminManageHelp') }}
+          </NTooltip>
+          <NTooltip :disabled="actions(row).canAssignRoles">
+            <template #trigger>
+              <span>
+                <NButton
+                  :disabled="!actions(row).canAssignRoles"
+                  quaternary
+                  size="small"
+                  type="primary"
+                  @click="openRoles(row.id)"
+                >
+                  {{ $t('page.system.user.assignRoles') }}
+                </NButton>
+              </span>
+            </template>
+            {{ $t('page.system.user.superAdminRolesHelp') }}
+          </NTooltip>
+          <NTooltip :disabled="actions(row).canManage">
+            <template #trigger>
+              <span>
+                <NDropdown
+                  :disabled="!actions(row).canManage || deletingID === row.id"
+                  :options="moreOptions(row)"
+                  :render-option="(info) => renderMoreOption(row, info)"
+                  trigger="click"
+                  @select="(key) => onMoreSelect(key, row)"
+                >
+                  <NButton
+                    :disabled="!actions(row).canManage || deletingID === row.id"
+                    :loading="deletingID === row.id"
+                    quaternary
+                    size="small"
+                    type="primary"
+                  >
+                    {{ $t('page.system.user.more') }}
+                    <ChevronDown class="ml-1 size-3" />
+                  </NButton>
+                </NDropdown>
+              </span>
+            </template>
+            {{ $t('page.system.user.superAdminManageHelp') }}
+          </NTooltip>
         </NSpace>
       </template>
     </Grid>

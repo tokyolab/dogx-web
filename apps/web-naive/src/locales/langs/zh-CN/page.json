@@ -6,6 +6,15 @@
     "qrcodeLogin": "二维码登录",
     "forgetPassword": "忘记密码",
     "passwordTooLong": "密码的 UTF-8 长度不能超过 72 字节",
+    "passwordRules": {
+      "title": "密码要求",
+      "length": "长度为 8～32 位",
+      "categories": "包含大写字母、小写字母、数字和特殊字符中的至少三种",
+      "characters": "仅限英文字母、数字及半角特殊字符 !{'@'}#$%^&*()_+-=（不含空格）",
+      "met": "已满足",
+      "unmet": "未满足",
+      "invalid": "密码不符合要求"
+    },
     "profile": "个人中心"
   },
   "dashboard": {
@@ -17,12 +26,19 @@
     "user": {
       "title": "用户管理",
       "username": "用户名",
+      "usernamePlaceholder": "请输入用户名",
       "nickname": "昵称",
+      "nicknamePlaceholder": "请输入昵称",
       "password": "初始密码",
+      "passwordPlaceholder": "请输入初始密码",
       "newPassword": "新密码",
+      "newPasswordPlaceholder": "请输入新密码",
       "email": "邮箱",
+      "emailPlaceholder": "请输入邮箱",
       "phone": "手机号",
+      "phonePlaceholder": "请输入手机号",
       "remark": "备注",
+      "remarkPlaceholder": "请输入备注",
       "status": "状态",
       "roles": "角色",
       "rolesPlaceholder": "请选择角色，可搜索",
@@ -36,7 +52,6 @@
       "assignRoles": "分配角色",
       "more": "更多",
       "resetPassword": "重置密码",
-      "passwordLength": "密码至少 12 个字符，且 UTF-8 长度不超过 72 字节",
       "emailInvalid": "请输入有效的邮箱地址",
       "required": "请输入{field}",
       "tooLong": "不能超过 {max} 个字符",
@@ -51,7 +66,13 @@
       "disableConfirm": "确定停用用户“{name}”吗？",
       "deleteConfirm": "确定删除用户“{name}”吗？",
       "discardContent": "用户信息尚未保存，关闭后本次修改将丢失。",
-      "superAdminRolesProtected": "不能修改超管账号的角色。"
+      "superAdminRolesProtected": "不能修改超管账号的角色。",
+      "superAdminStatusHelp": "超级管理员账号不能停用",
+      "selfStatusHelp": "不能停用当前登录账号",
+      "superAdminRolesHelp": "超级管理员拥有全部权限，无需分配角色",
+      "superAdminManageHelp": "只能由超级管理员本人修改此账号或重置密码",
+      "superAdminDeleteHelp": "超级管理员账号不能删除",
+      "selfDeleteHelp": "不能删除当前登录账号"
     },
     "role": {
       "title": "角色管理",

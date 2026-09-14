@@ -6,6 +6,15 @@
     "qrcodeLogin": "Qr Code Login",
     "forgetPassword": "Forget Password",
     "passwordTooLong": "Password must not exceed 72 UTF-8 bytes",
+    "passwordRules": {
+      "title": "Password requirements",
+      "length": "Use 8–32 characters",
+      "categories": "Include at least three of: uppercase letters, lowercase letters, digits and special characters",
+      "characters": "Only English letters, digits and !{'@'}#$%^&*()_+-= are allowed (no spaces)",
+      "met": "Met",
+      "unmet": "Not met",
+      "invalid": "Password requirements not met"
+    },
     "profile": "Profile"
   },
   "dashboard": {
@@ -17,12 +26,19 @@
     "user": {
       "title": "User Management",
       "username": "Username",
+      "usernamePlaceholder": "Enter a username",
       "nickname": "Nickname",
+      "nicknamePlaceholder": "Enter a nickname",
       "password": "Initial Password",
+      "passwordPlaceholder": "Enter an initial password",
       "newPassword": "New Password",
+      "newPasswordPlaceholder": "Enter a new password",
       "email": "Email",
+      "emailPlaceholder": "Enter an email address",
       "phone": "Phone",
+      "phonePlaceholder": "Enter a phone number",
       "remark": "Remark",
+      "remarkPlaceholder": "Enter a remark",
       "status": "Status",
       "roles": "Roles",
       "rolesPlaceholder": "Select or search roles",
@@ -36,7 +52,6 @@
       "assignRoles": "Assign Roles",
       "more": "More",
       "resetPassword": "Reset Password",
-      "passwordLength": "Password must contain at least 12 characters and no more than 72 UTF-8 bytes",
       "emailInvalid": "Enter a valid email address",
       "required": "Enter {field}",
       "tooLong": "Cannot exceed {max} characters",
@@ -51,7 +66,13 @@
       "disableConfirm": "Disable user \"{name}\"?",
       "deleteConfirm": "Delete user \"{name}\"?",
       "discardContent": "Your user changes have not been saved. Closing will discard them.",
-      "superAdminRolesProtected": "The super administrator account's roles cannot be changed."
+      "superAdminRolesProtected": "The super administrator account's roles cannot be changed.",
+      "superAdminStatusHelp": "The super administrator account cannot be disabled",
+      "selfStatusHelp": "You cannot disable your own account",
+      "superAdminRolesHelp": "The super administrator has all permissions and does not need role assignments",
+      "superAdminManageHelp": "Only the super administrator can edit their own account or reset its password",
+      "superAdminDeleteHelp": "The super administrator account cannot be deleted",
+      "selfDeleteHelp": "You cannot delete your own account"
     },
     "role": {
       "title": "Role Management",

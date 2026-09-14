@@ -22,6 +22,7 @@ const mocks = vi.hoisted(() => ({
   deleteUser: vi.fn(),
   operatorID: 1,
   reload: vi.fn(),
+  updateUserStatus: vi.fn(),
   useGrid: vi.fn(),
   useModal: vi.fn(),
   warning: vi.fn(),
@@ -58,7 +59,7 @@ vi.mock('#/adapter/vxe-table', () => ({ useVbenVxeGrid: mocks.useGrid }));
 vi.mock('#/api/system', () => ({
   deleteUserApi: mocks.deleteUser,
   listUsersApi: vi.fn(),
-  updateUserStatusApi: vi.fn(),
+  updateUserStatusApi: mocks.updateUserStatus,
 }));
 vi.mock('#/api/system/role', () => ({ SUPER_ADMIN_ROLE_CODE: 'super_admin' }));
 vi.mock('./user-form-modal.vue', () => ({ default: () => h('div') }));
@@ -74,6 +75,7 @@ const modalApis = Array.from({ length: 3 }, () => ({
 }));
 
 beforeEach(() => {
+  vi.useFakeTimers();
   vi.clearAllMocks();
   mocks.deleteUser.mockReset();
   mocks.operatorID = 1;
@@ -99,7 +101,10 @@ beforeEach(() => {
     defineComponent(
       (_, { slots }) =>
         () =>
-          h('div', slots.operation?.({ row: record })),
+          h('div', [
+            slots.status?.({ row: record }),
+            slots.operation?.({ row: record }),
+          ]),
     ),
     { reload: mocks.reload },
   ]);
@@ -111,7 +116,9 @@ afterEach(async () => {
   app?.unmount();
   app = undefined;
   await nextTick();
+  await vi.advanceTimersByTimeAsync(350);
   container.remove();
+  vi.useRealTimers();
 });
 
 function mount() {
@@ -146,6 +153,36 @@ async function openMore() {
     delete: await menuItem('Delete'),
     resetPassword: await menuItem('Reset Password'),
   };
+}
+
+function statusSwitch() {
+  const result = container.querySelector<HTMLElement>('[role="switch"]');
+  assert(result);
+  return result;
+}
+
+function buttonTrigger(text: string) {
+  const result = button(text).parentElement;
+  assert(result);
+  return result;
+}
+
+async function checkTooltip(target: HTMLElement, expected?: string) {
+  target.dispatchEvent(new MouseEvent('mouseenter'));
+  await nextTick();
+  await vi.advanceTimersByTimeAsync(350);
+  const tooltip = document.querySelector('.n-tooltip');
+  expect(tooltip?.textContent?.trim()).toBe(expected);
+  target.dispatchEvent(new MouseEvent('mouseleave'));
+  await nextTick();
+  await vi.advanceTimersByTimeAsync(350);
+  expect(document.querySelector('.n-tooltip')).toBeNull();
+}
+
+async function checkDeleteTooltip(item: HTMLElement, expected?: string) {
+  const trigger = item.closest<HTMLElement>('.n-dropdown-option');
+  assert(trigger);
+  await checkTooltip(trigger, expected);
 }
 
 describe('user list more actions', () => {
@@ -186,6 +223,7 @@ describe('user list more actions', () => {
     expect(mocks.deleteUser).toHaveBeenCalledExactlyOnceWith(9);
     await nextTick();
     expect(button('More').disabled).toBe(true);
+    await checkTooltip(buttonTrigger('More'));
     assert(finish);
     finish();
     await vi.waitFor(() => expect(mocks.reload).toHaveBeenCalledOnce());
@@ -225,7 +263,20 @@ describe('user list more actions', () => {
     mount();
     expect(button('Edit').disabled).toBe(false);
     expect(button('Assign Roles').disabled).toBe(true);
+    await checkTooltip(statusSwitch(), 'page.system.user.superAdminStatusHelp');
+    await checkTooltip(
+      buttonTrigger('Assign Roles'),
+      'page.system.user.superAdminRolesHelp',
+    );
+    statusSwitch().click();
+    button('Assign Roles').click();
+    expect(mocks.updateUserStatus).not.toHaveBeenCalled();
+    expect(modalApis[1]?.open).not.toHaveBeenCalled();
     const menu = await openMore();
+    await checkDeleteTooltip(
+      menu.delete,
+      'page.system.user.superAdminDeleteHelp',
+    );
     menu.delete.click();
     expect(mocks.warning).not.toHaveBeenCalled();
     expect(mocks.deleteUser).not.toHaveBeenCalled();
@@ -233,7 +284,7 @@ describe('user list more actions', () => {
     expect(modalApis[2]?.open).toHaveBeenCalledOnce();
   });
 
-  it('disables all management actions on another super administrator account', () => {
+  it('explains disabled management actions on another super administrator account', async () => {
     record.roles = [
       { code: 'super_admin', id: 1, name: 'Super Admin', status: 1 },
     ];
@@ -241,14 +292,39 @@ describe('user list more actions', () => {
     expect(button('Edit').disabled).toBe(true);
     expect(button('Assign Roles').disabled).toBe(true);
     expect(button('More').disabled).toBe(true);
+    for (const text of ['Edit', 'More']) {
+      await checkTooltip(
+        buttonTrigger(text),
+        'page.system.user.superAdminManageHelp',
+      );
+      button(text).click();
+    }
+    expect(modalApis[0]?.open).not.toHaveBeenCalled();
+    expect(document.querySelector('.n-dropdown-menu')).toBeNull();
   });
 
   it('keeps a regular user protected against self-deletion', async () => {
     mocks.operatorID = record.id;
     mount();
+    await checkTooltip(statusSwitch(), 'page.system.user.selfStatusHelp');
+    statusSwitch().click();
+    expect(mocks.updateUserStatus).not.toHaveBeenCalled();
+    expect(button('Assign Roles').disabled).toBe(false);
     const menu = await openMore();
+    await checkDeleteTooltip(menu.delete, 'page.system.user.selfDeleteHelp');
     menu.delete.click();
     expect(mocks.warning).not.toHaveBeenCalled();
     expect(mocks.deleteUser).not.toHaveBeenCalled();
+  });
+
+  it('does not show protection reasons for allowed actions on ordinary users', async () => {
+    mount();
+    await checkTooltip(statusSwitch());
+    for (const text of ['Edit', 'Assign Roles', 'More']) {
+      expect(button(text).disabled).toBe(false);
+      await checkTooltip(buttonTrigger(text));
+    }
+    const menu = await openMore();
+    await checkDeleteTooltip(menu.delete);
   });
 });

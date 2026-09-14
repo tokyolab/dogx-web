@@ -25,17 +25,14 @@ const [Form, formApi] = useVbenForm({
   wrapperClass: 'grid-cols-1',
   schema: [
     {
-      component: 'Input',
+      component: 'NewPasswordInput',
       componentProps: {
-        autocomplete: 'new-password',
-        showPasswordOn: 'click',
-        type: 'password',
+        placeholder: $t('page.system.user.newPasswordPlaceholder'),
       },
       fieldName: 'password',
-      help: $t('page.system.user.passwordLength'),
       label: $t('page.system.user.newPassword'),
       rules: z.string().refine(isValidNewPassword, {
-        message: $t('page.system.user.passwordLength'),
+        message: $t('page.auth.passwordRules.invalid'),
       }),
     },
   ],

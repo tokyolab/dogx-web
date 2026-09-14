@@ -2,12 +2,10 @@
 import type { VbenFormSchema } from '#/adapter/form';
 import type { UserApi } from '#/api/system';
 
-import { nextTick, ref } from 'vue';
+import { markRaw, nextTick, ref } from 'vue';
 
 import { useVbenModal } from '@vben/common-ui';
 import { $t } from '@vben/locales';
-
-import { NFormItem } from 'naive-ui';
 
 import { useVbenForm, z } from '#/adapter/form';
 import { dialog, message } from '#/adapter/naive';
@@ -23,12 +21,12 @@ interface ModalData {
 }
 interface FormValues extends UserApi.Profile {
   password: string;
+  roleIds?: number[];
   status: number;
   username: string;
 }
 
 const currentID = ref<number>();
-const roleIDs = ref<number[]>([]);
 const submitting = ref(false);
 const ready = ref(false);
 let initial = '';
@@ -44,37 +42,56 @@ function createSchema(editing: boolean): VbenFormSchema[] {
   const schema: VbenFormSchema[] = [
     {
       component: 'Input',
-      componentProps: { disabled: editing, maxlength: 64 },
+      componentProps: {
+        disabled: editing,
+        maxlength: 64,
+        placeholder: $t('page.system.user.usernamePlaceholder'),
+        showCount: true,
+      },
       fieldName: 'username',
       label: $t('page.system.user.username'),
       rules: requiredText($t('page.system.user.username'), 64),
     },
     {
       component: 'Input',
-      componentProps: { maxlength: 64 },
+      componentProps: {
+        maxlength: 64,
+        placeholder: $t('page.system.user.nicknamePlaceholder'),
+        showCount: true,
+      },
       fieldName: 'nickname',
       label: $t('page.system.user.nickname'),
       rules: requiredText($t('page.system.user.nickname'), 64),
     },
   ];
   if (!editing)
-    schema.push({
-      component: 'Input',
-      componentProps: {
-        autocomplete: 'new-password',
-        showPasswordOn: 'click',
-        type: 'password',
+    schema.push(
+      {
+        component: 'NewPasswordInput',
+        componentProps: {
+          placeholder: $t('page.system.user.passwordPlaceholder'),
+        },
+        fieldName: 'password',
+        label: $t('page.system.user.password'),
+        rules: z.string().refine(isValidNewPassword, {
+          message: $t('page.auth.passwordRules.invalid'),
+        }),
       },
-      fieldName: 'password',
-      label: $t('page.system.user.password'),
-      rules: z.string().refine(isValidNewPassword, {
-        message: $t('page.system.user.passwordLength'),
-      }),
-    });
+      {
+        component: markRaw(UserRoleSelect),
+        defaultValue: [],
+        fieldName: 'roleIds',
+        label: $t('page.system.user.roles'),
+      },
+    );
   schema.push(
     {
       component: 'Input',
-      componentProps: { maxlength: 255 },
+      componentProps: {
+        maxlength: 255,
+        placeholder: $t('page.system.user.emailPlaceholder'),
+        showCount: true,
+      },
       fieldName: 'email',
       label: $t('page.system.user.email'),
       rules: z
@@ -86,7 +103,11 @@ function createSchema(editing: boolean): VbenFormSchema[] {
     },
     {
       component: 'Input',
-      componentProps: { maxlength: 32 },
+      componentProps: {
+        maxlength: 32,
+        placeholder: $t('page.system.user.phonePlaceholder'),
+        showCount: true,
+      },
       fieldName: 'phone',
       label: $t('page.system.user.phone'),
       rules: z
@@ -99,6 +120,7 @@ function createSchema(editing: boolean): VbenFormSchema[] {
       componentProps: {
         autosize: { maxRows: 5, minRows: 3 },
         maxlength: 500,
+        placeholder: $t('page.system.user.remarkPlaceholder'),
         showCount: true,
         type: 'textarea',
       },
@@ -136,7 +158,7 @@ function snapshot(values: FormValues) {
   return JSON.stringify({
     ...profile,
     password: values.password ?? '',
-    roleIds: roleIDs.value.toSorted((a, b) => a - b),
+    roleIds: (values.roleIds ?? []).toSorted((a, b) => a - b),
     status: values.status,
     username: values.username?.trim() ?? '',
   });
@@ -184,18 +206,19 @@ const [Modal, modalApi] = useVbenModal({
     try {
       const validation = await formApi.validate();
       if (!validation.valid) return;
-      if (roleIDs.value.length > 100) {
+      const values = await formApi.getValues<FormValues>();
+      const roleIDs = values.roleIds ?? [];
+      if (!currentID.value && roleIDs.length > 100) {
         message.warning($t('page.system.user.tooManyRoles'));
         return;
       }
-      const values = await formApi.getValues<FormValues>();
       const profile = normalizeUserProfile(values);
       await (currentID.value
         ? updateUserApi({ ...profile, id: currentID.value })
         : createUserApi({
             ...profile,
             password: values.password,
-            roleIds: roleIDs.value,
+            roleIds: roleIDs,
             status: values.status,
             username: values.username.trim(),
           }));
@@ -212,7 +235,6 @@ const [Modal, modalApi] = useVbenModal({
     const token = ++generation;
     ready.value = false;
     initial = '';
-    roleIDs.value = [];
     if (!open) {
       currentID.value = undefined;
       await formApi.resetForm();
@@ -240,6 +262,7 @@ const [Modal, modalApi] = useVbenModal({
         password: '',
         phone: '',
         remark: '',
+        roleIds: [],
         status: 1,
         username: '',
       };
@@ -267,13 +290,16 @@ defineExpose(modalApi);
 
 <template>
   <Modal>
-    <Form />
-    <NFormItem
-      v-if="!currentID && ready"
-      :label="$t('page.system.user.roles')"
-      label-placement="top"
-    >
-      <UserRoleSelect v-model:value="roleIDs" :disabled="submitting" />
-    </NFormItem>
+    <Form>
+      <template #roleIds="{ value, handleChange }">
+        <!-- Mount after initialization so opening an edit form never loads role options. -->
+        <UserRoleSelect
+          v-if="ready"
+          :disabled="submitting"
+          :value="value ?? []"
+          @update:value="handleChange"
+        />
+      </template>
+    </Form>
   </Modal>
 </template>

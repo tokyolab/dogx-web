@@ -129,6 +129,7 @@ export type ComponentType =
   | 'IconPicker'
   | 'Input'
   | 'InputNumber'
+  | 'NewPasswordInput'
   | 'RadioGroup'
   | 'Select'
   | 'Space'
@@ -151,6 +152,7 @@ export interface ComponentPropsMap {
   IconPicker: IconPickerProps;
   Input: InputProps;
   InputNumber: InputNumberProps;
+  NewPasswordInput: InputProps;
   RadioGroup: RadioGroupProps;
   Select: SelectProps;
   Space: SpaceProps;
@@ -228,6 +230,10 @@ async function initComponentAdapter() {
     InputNumber: withDefaultPlaceholder(NInputNumber, 'input', {
       style: { width: '100%' },
     }),
+    NewPasswordInput: withDefaultPlaceholder(
+      defineAsyncComponent(() => import('#/components/new-password-input.vue')),
+      'input',
+    ),
     RadioGroup: (props, { attrs, slots }) => {
       let defaultSlot;
       if (Reflect.has(slots, 'default')) {

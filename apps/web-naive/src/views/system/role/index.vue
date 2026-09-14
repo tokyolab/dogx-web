@@ -211,7 +211,11 @@ async function deleteRole(record: RoleApi.RoleItem) {
       </template>
 
       <template #roleType="{ row }">
-        <NTag :bordered="false" :type="row.isSystem ? 'info' : 'default'">
+        <NTag
+          :bordered="false"
+          :type="row.isSystem ? 'info' : 'default'"
+          size="small"
+        >
           {{
             row.isSystem
               ? $t('page.system.role.systemRole')
