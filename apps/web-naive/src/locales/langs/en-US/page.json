@@ -66,6 +66,7 @@
       "disableConfirm": "Disable user \"{name}\"?",
       "deleteConfirm": "Delete user \"{name}\"?",
       "discardContent": "Your user changes have not been saved. Closing will discard them.",
+      "passwordDiscardContent": "The new password has not been saved. Closing will discard it.",
       "superAdminRolesProtected": "The super administrator account's roles cannot be changed.",
       "superAdminStatusHelp": "The super administrator account cannot be disabled",
       "selfStatusHelp": "You cannot disable your own account",

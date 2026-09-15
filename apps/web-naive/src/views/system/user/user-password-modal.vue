@@ -6,7 +6,7 @@ import { $t } from '@vben/locales';
 import { useUserStore } from '@vben/stores';
 
 import { useVbenForm, z } from '#/adapter/form';
-import { message } from '#/adapter/naive';
+import { dialog, message } from '#/adapter/naive';
 import { resetUserPasswordApi } from '#/api/system';
 import { useAuthStore } from '#/store';
 import { isValidNewPassword } from '#/utils/password';
@@ -16,8 +16,31 @@ interface ModalData {
   nickname: string;
 }
 const submitting = ref(false);
+let saved = false;
 const userStore = useUserStore();
 const authStore = useAuthStore();
+
+async function beforeClose() {
+  if (submitting.value) return false;
+  // A successful reset closes programmatically with the password still filled.
+  if (saved) return true;
+  const { password } = await formApi.getValues<{ password?: string }>();
+  if (!password) return true;
+
+  return await new Promise<boolean>((resolve) => {
+    dialog.warning({
+      content: $t('page.system.user.passwordDiscardContent'),
+      maskClosable: false,
+      negativeText: $t('common.cancel'),
+      onClose: () => resolve(false),
+      onNegativeClick: () => resolve(false),
+      onPositiveClick: () => resolve(true),
+      positiveText: $t('page.system.role.discardChanges'),
+      title: $t('page.system.role.discardChangesTitle'),
+    });
+  });
+}
+
 const [Form, formApi] = useVbenForm({
   commonConfig: { componentProps: { class: 'w-full' } },
   layout: 'vertical',
@@ -39,7 +62,7 @@ const [Form, formApi] = useVbenForm({
 });
 const [Modal, modalApi] = useVbenModal({
   fullscreenButton: false,
-  onBeforeClose: () => !submitting.value,
+  onBeforeClose: beforeClose,
   onCancel() {
     modalApi.close();
   },
@@ -53,6 +76,7 @@ const [Modal, modalApi] = useVbenModal({
       if (!validation.valid) return;
       const { password } = await formApi.getValues<{ password: string }>();
       await resetUserPasswordApi(data.id, password);
+      saved = true;
       message.success($t('page.system.user.passwordReset'));
     } finally {
       submitting.value = false;
@@ -63,6 +87,7 @@ const [Modal, modalApi] = useVbenModal({
       await authStore.logout(false, false);
   },
   async onOpenChange(open) {
+    saved = false;
     await nextTick();
     await formApi.resetForm();
     if (!open) return;

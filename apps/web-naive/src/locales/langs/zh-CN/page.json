@@ -66,6 +66,7 @@
       "disableConfirm": "确定停用用户“{name}”吗？",
       "deleteConfirm": "确定删除用户“{name}”吗？",
       "discardContent": "用户信息尚未保存，关闭后本次修改将丢失。",
+      "passwordDiscardContent": "新密码尚未保存，关闭后本次输入将丢失。",
       "superAdminRolesProtected": "不能修改超管账号的角色。",
       "superAdminStatusHelp": "超级管理员账号不能停用",
       "selfStatusHelp": "不能停用当前登录账号",
