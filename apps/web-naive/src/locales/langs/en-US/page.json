@@ -1,5 +1,8 @@
 {
   "auth": {
+    "usernameRules": "Use 1–64 English letters, digits or hyphens (-). Hyphens cannot start or end the username or appear consecutively. Usernames are case-insensitive when signing in.",
+    "usernameInvalid": "Invalid username format",
+    "usernameTooLong": "Username cannot exceed 64 characters",
     "login": "Login",
     "register": "Register",
     "codeLogin": "Code Login",
@@ -113,7 +116,7 @@
       "disableSuccess": "Role disabled",
       "deleteSuccess": "Role deleted",
       "enableConfirm": "Enable role \"{name}\"?",
-      "disableConfirm": "Disabling role \"{name}\" revokes every related user session. Continue?",
+      "disableConfirm": "Disable role \"{name}\"?",
       "deleteConfirm": "Delete role \"{name}\"? Roles assigned to users cannot be deleted.",
       "systemStatusHelp": "A built-in role cannot be disabled",
       "systemDeleteHelp": "A built-in role cannot be deleted",

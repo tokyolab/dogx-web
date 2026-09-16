@@ -39,7 +39,6 @@ function createSchema(isUpdate: boolean, isSystem: boolean): VbenFormSchema[] {
         disabled: isUpdate && isSystem,
         maxlength: 64,
         placeholder: $t('page.system.role.codePlaceholder'),
-        showCount: true,
       },
       fieldName: 'code',
       help:
@@ -66,7 +65,6 @@ function createSchema(isUpdate: boolean, isSystem: boolean): VbenFormSchema[] {
       componentProps: {
         maxlength: 64,
         placeholder: $t('page.system.role.namePlaceholder'),
-        showCount: true,
       },
       fieldName: 'name',
       label: $t('page.system.role.name'),

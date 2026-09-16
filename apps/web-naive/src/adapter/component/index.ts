@@ -33,6 +33,10 @@ import { defineAsyncComponent, defineComponent, h, ref } from 'vue';
 import { ApiComponent, globalShareState, IconPicker } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
+// Naive UI identifies RadioButton by its direct child VNode name. An async
+// wrapper hides that name and drops the button-group layout and separators.
+import { NRadioButton } from 'naive-ui/es/radio';
+
 import { message } from '#/adapter/naive';
 
 const NButton = defineAsyncComponent(() =>
@@ -58,9 +62,6 @@ const NInputNumber = defineAsyncComponent(() =>
 );
 const NRadio = defineAsyncComponent(() =>
   import('naive-ui/es/radio').then((res) => res.NRadio),
-);
-const NRadioButton = defineAsyncComponent(() =>
-  import('naive-ui/es/radio').then((res) => res.NRadioButton),
 );
 const NRadioGroup = defineAsyncComponent(() =>
   import('naive-ui/es/radio').then((res) => res.NRadioGroup),

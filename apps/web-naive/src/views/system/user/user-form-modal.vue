@@ -11,6 +11,7 @@ import { useVbenForm, z } from '#/adapter/form';
 import { dialog, message } from '#/adapter/naive';
 import { createUserApi, getManagedUserApi, updateUserApi } from '#/api/system';
 import { isValidNewPassword } from '#/utils/password';
+import { isValidUsername, MAX_USERNAME_CHARACTERS } from '#/utils/username';
 
 import { normalizeUserProfile } from './user-form';
 import UserRoleSelect from './user-role-select.vue';
@@ -44,20 +45,29 @@ function createSchema(editing: boolean): VbenFormSchema[] {
       component: 'Input',
       componentProps: {
         disabled: editing,
-        maxlength: 64,
+        maxlength: MAX_USERNAME_CHARACTERS,
         placeholder: $t('page.system.user.usernamePlaceholder'),
-        showCount: true,
       },
       fieldName: 'username',
+      help: $t('page.auth.usernameRules'),
       label: $t('page.system.user.username'),
-      rules: requiredText($t('page.system.user.username'), 64),
+      rules: z
+        .string()
+        .min(1, {
+          message: $t('page.system.user.required', {
+            field: $t('page.system.user.username'),
+          }),
+        })
+        .max(MAX_USERNAME_CHARACTERS, {
+          message: $t('page.auth.usernameTooLong'),
+        })
+        .refine(isValidUsername, { message: $t('page.auth.usernameInvalid') }),
     },
     {
       component: 'Input',
       componentProps: {
         maxlength: 64,
         placeholder: $t('page.system.user.nicknamePlaceholder'),
-        showCount: true,
       },
       fieldName: 'nickname',
       label: $t('page.system.user.nickname'),
@@ -90,7 +100,6 @@ function createSchema(editing: boolean): VbenFormSchema[] {
       componentProps: {
         maxlength: 255,
         placeholder: $t('page.system.user.emailPlaceholder'),
-        showCount: true,
       },
       fieldName: 'email',
       label: $t('page.system.user.email'),
@@ -106,7 +115,6 @@ function createSchema(editing: boolean): VbenFormSchema[] {
       componentProps: {
         maxlength: 32,
         placeholder: $t('page.system.user.phonePlaceholder'),
-        showCount: true,
       },
       fieldName: 'phone',
       label: $t('page.system.user.phone'),
@@ -160,7 +168,7 @@ function snapshot(values: FormValues) {
     password: values.password ?? '',
     roleIds: (values.roleIds ?? []).toSorted((a, b) => a - b),
     status: values.status,
-    username: values.username?.trim() ?? '',
+    username: values.username ?? '',
   });
 }
 
@@ -220,7 +228,7 @@ const [Modal, modalApi] = useVbenModal({
             password: values.password,
             roleIds: roleIDs,
             status: values.status,
-            username: values.username.trim(),
+            username: values.username,
           }));
       initial = snapshot(values);
       message.success($t('page.system.user.saveSuccess'));

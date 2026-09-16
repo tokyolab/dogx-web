@@ -1,5 +1,8 @@
 {
   "auth": {
+    "usernameRules": "1～64 个字符，仅限英文字母、数字和半角短划线（-）；短划线不能在开头、结尾或连续出现。登录不区分用户名大小写。",
+    "usernameInvalid": "用户名格式不正确",
+    "usernameTooLong": "用户名不能超过 64 个字符",
     "login": "登录",
     "register": "注册",
     "codeLogin": "验证码登录",
@@ -113,7 +116,7 @@
       "disableSuccess": "角色已停用",
       "deleteSuccess": "角色删除成功",
       "enableConfirm": "确定启用角色“{name}”吗？",
-      "disableConfirm": "停用角色“{name}”将注销关联用户的全部会话，确定继续吗？",
+      "disableConfirm": "确定停用角色“{name}”吗？",
       "deleteConfirm": "确定删除角色“{name}”吗？存在用户引用时将无法删除。",
       "systemStatusHelp": "系统内置角色不可停用",
       "systemDeleteHelp": "系统内置角色不可删除",

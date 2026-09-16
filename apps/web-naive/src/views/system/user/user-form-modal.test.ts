@@ -275,6 +275,46 @@ describe('user form role field', () => {
 });
 
 describe('user form field feedback', () => {
+  it('validates usernames without trimming or changing case', async () => {
+    await open();
+    const field = schema.find((item) => item.fieldName === 'username');
+    expect(field?.help).toBe('page.auth.usernameRules');
+    const rules = field?.rules as {
+      safeParse: (value: string) => { data?: string; success: boolean };
+    };
+    for (const username of [
+      'A',
+      '123456',
+      'DogX-Admin',
+      'a-b-c',
+      'A'.repeat(64),
+    ]) {
+      expect(rules.safeParse(username)).toMatchObject({
+        data: username,
+        success: true,
+      });
+    }
+    for (const username of [
+      '',
+      '-admin',
+      'admin-',
+      'ad--min',
+      'admin_01',
+      'admin.01',
+      '管理员',
+      ' admin ',
+      'admin\n',
+      'a'.repeat(65),
+    ]) {
+      expect(rules.safeParse(username).success).toBe(false);
+    }
+    values.username = 'DogX-Admin';
+    await hooks.onConfirm();
+    expect(mocks.createUser).toHaveBeenCalledWith(
+      expect.objectContaining({ username: 'DogX-Admin' }),
+    );
+  });
+
   it.each([
     { id: undefined, mode: 'create' },
     { id: 42, mode: 'edit' },
@@ -294,20 +334,27 @@ describe('user form field feedback', () => {
   it.each([
     { id: undefined, mode: 'create' },
     { id: 42, mode: 'edit' },
-  ])('shows text length counters in $mode mode', async ({ id }) => {
-    await open(id);
-    for (const [fieldName, maxlength] of [
-      ['username', 64],
-      ['nickname', 64],
-      ['email', 255],
-      ['phone', 32],
-      ['remark', 500],
-    ] as const) {
+  ])(
+    'only shows the remark counter while retaining length limits in $mode mode',
+    async ({ id }) => {
+      await open(id);
+      for (const [fieldName, maxlength] of [
+        ['username', 64],
+        ['nickname', 64],
+        ['email', 255],
+        ['phone', 32],
+      ] as const) {
+        const props = schema.find(
+          (field) => field.fieldName === fieldName,
+        )?.componentProps;
+        expect(props).toMatchObject({ maxlength });
+        expect(props).not.toHaveProperty('showCount', true);
+      }
       expect(
-        schema.find((field) => field.fieldName === fieldName)?.componentProps,
-      ).toMatchObject({ maxlength, showCount: true });
-    }
-  });
+        schema.find((field) => field.fieldName === 'remark')?.componentProps,
+      ).toMatchObject({ maxlength: 500, showCount: true, type: 'textarea' });
+    },
+  );
 });
 
 describe('user form unsaved changes', () => {

@@ -9,6 +9,7 @@ import { $t } from '@vben/locales';
 
 import { useAuthStore } from '#/store';
 import { isPasswordWithinByteLimit } from '#/utils/password';
+import { isValidUsername, MAX_USERNAME_CHARACTERS } from '#/utils/username';
 
 defineOptions({ name: 'Login' });
 
@@ -31,10 +32,17 @@ const formSchema = computed((): VbenFormSchema[] => {
       component: 'VbenInput',
       componentProps: {
         placeholder: $t('authentication.usernameTip'),
+        title: $t('page.auth.usernameRules'),
       },
       fieldName: 'username',
       label: $t('authentication.username'),
-      rules: z.string().min(1, { message: $t('authentication.usernameTip') }),
+      rules: z
+        .string()
+        .min(1, { message: $t('authentication.usernameTip') })
+        .max(MAX_USERNAME_CHARACTERS, {
+          message: $t('page.auth.usernameTooLong'),
+        })
+        .refine(isValidUsername, { message: $t('page.auth.usernameInvalid') }),
     },
     {
       component: 'VbenInputPassword',
