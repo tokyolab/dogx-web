@@ -8,7 +8,7 @@ import { defineOverridesPreferences } from '@vben/preferences';
 export const overridesPreferences = defineOverridesPreferences({
   // overrides
   app: {
-    accessMode: 'frontend',
+    accessMode: 'mixed',
     defaultAvatar: '/avatar.svg',
     enableCheckUpdates: false,
     enableRefreshToken: true,

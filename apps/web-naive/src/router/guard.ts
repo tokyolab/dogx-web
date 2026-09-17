@@ -9,6 +9,7 @@ import { accessRoutes, coreRouteNames } from '#/router/routes';
 import { useAuthStore } from '#/store';
 
 import { generateAccess } from './access';
+import { getAccessGeneration } from './reset';
 
 /**
  * 通用守卫配置
@@ -91,7 +92,9 @@ function setupAccessGuard(router: Router) {
     }
     // 生成路由表
     // 当前登录用户拥有的角色标识列表
+    const generation = getAccessGeneration();
     const userInfo = userStore.userInfo || (await authStore.fetchUserInfo());
+    if (generation !== getAccessGeneration()) return false;
     const userRoles = userInfo.roles ?? [];
 
     // 生成菜单和路由
@@ -101,6 +104,8 @@ function setupAccessGuard(router: Router) {
       // 则会在菜单中显示，但是访问会被重定向到403
       routes: accessRoutes,
     });
+
+    if (generation !== getAccessGeneration()) return false;
 
     // 保存菜单信息和路由信息
     accessStore.setAccessMenus(accessibleMenus);

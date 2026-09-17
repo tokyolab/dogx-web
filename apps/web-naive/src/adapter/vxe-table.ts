@@ -38,6 +38,9 @@ setupVbenVxeTable({
           showResponseMsg: false,
         },
         round: true,
+        rowConfig: {
+          isHover: true,
+        },
         showOverflow: true,
         size: 'small',
       } as VxeTableGridOptions,

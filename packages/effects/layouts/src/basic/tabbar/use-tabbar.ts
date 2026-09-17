@@ -23,7 +23,7 @@ import {
 } from '@vben/icons';
 import { $t, useI18n } from '@vben/locales';
 import { getTabKey, useAccessStore, useTabbarStore } from '@vben/stores';
-import { filterTree } from '@vben/utils';
+import { filterTree, resolveRouteTitle } from '@vben/utils';
 
 export function useTabbar() {
   const router = useRouter();
@@ -90,7 +90,7 @@ export function useTabbar() {
       ...tab,
       meta: {
         ...tab?.meta,
-        title: $t(tab?.meta?.title as string),
+        title: resolveRouteTitle(tab.meta, $t),
       },
     };
   }

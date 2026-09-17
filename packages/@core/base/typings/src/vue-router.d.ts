@@ -101,6 +101,8 @@ interface RouteMeta {
    * @default -1
    */
   maxNumOfOpenTab?: number;
+  /** 菜单层级独立于组件嵌套时，保留完整的原文面包屑。 */
+  menuBreadcrumbs?: { icon?: string; path: string; title: string }[];
   /**
    * 菜单可以看到，但是访问会被重定向到403
    */
@@ -125,6 +127,8 @@ interface RouteMeta {
    * 标题名称
    */
   title: string;
+  /** 后台录入的标题原样展示，不作为国际化键解析。 */
+  titleIsLiteral?: boolean;
 }
 
 // 定义递归类型以将 RouteRecordRaw 的 component 属性更改为 string

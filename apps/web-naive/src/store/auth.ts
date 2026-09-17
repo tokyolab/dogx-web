@@ -14,6 +14,7 @@ import { defineStore } from 'pinia';
 import { notification } from '#/adapter/naive';
 import { getUserInfoApi, loginApi, logoutApi } from '#/api';
 import { $t } from '#/locales';
+import { resetAccessRoutes } from '#/router/reset';
 
 export const useAuthStore = defineStore('auth', () => {
   const accessStore = useAccessStore();
@@ -39,6 +40,10 @@ export const useAuthStore = defineStore('auth', () => {
 
       // 如果成功获取到 accessToken
       if (credentials.accessToken) {
+        resetAccessRoutes(router);
+        accessStore.setAccessMenus([]);
+        accessStore.setAccessRoutes([]);
+        accessStore.setIsAccessChecked(false);
         accessStore.setCredentials(credentials);
         accessStore.setAccessCodes([]);
 
@@ -46,6 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
 
         if (accessStore.loginExpired) {
           accessStore.setLoginExpired(false);
+          await router.replace(router.currentRoute.value.fullPath);
         } else {
           onSuccess
             ? await onSuccess?.()
@@ -87,6 +93,7 @@ export const useAuthStore = defineStore('auth', () => {
       // 不做任何处理
     }
     resetAllStores();
+    resetAccessRoutes(router);
     accessStore.setLoginExpired(false);
 
     // 回登录页带上当前路由地址

@@ -6,6 +6,7 @@ import { preferences } from '@vben/preferences';
 import { initStores } from '@vben/stores';
 import '@vben/styles';
 import '@vben/styles/naive';
+import { resolveRouteTitle } from '@vben/utils';
 
 import { useTitle } from '@vueuse/core';
 
@@ -63,9 +64,9 @@ async function bootstrap(namespace: string) {
   // 动态更新标题
   watchEffect(() => {
     if (preferences.app.dynamicTitle) {
-      const routeTitle = router.currentRoute.value.meta?.title;
+      const routeTitle = resolveRouteTitle(router.currentRoute.value.meta, $t);
       const pageTitle =
-        (routeTitle ? `${$t(routeTitle)} - ` : '') + preferences.app.name;
+        (routeTitle ? `${routeTitle} - ` : '') + preferences.app.name;
       useTitle(pageTitle);
     }
   });
