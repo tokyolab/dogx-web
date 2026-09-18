@@ -1,3 +1,5 @@
+import type { MenuApi } from './menu';
+
 import { requestClient } from '#/api/request';
 
 export const SUPER_ADMIN_ROLE_CODE = 'super_admin';
@@ -90,6 +92,15 @@ export function listAPIsApi(data: RoleApi.APIListParams = {}) {
   return requestClient.post<{ items: RoleApi.APIItem[] }>('/api/list', data);
 }
 
+export function getRoleMenusApi(roleId: number) {
+  return requestClient.post<{ items: MenuApi.Item[]; menuIds: number[] }>(
+    '/role/menu/get',
+    { roleId },
+  );
+}
+export function updateRoleMenusApi(roleId: number, menuIds: number[]) {
+  return requestClient.post('/role/menu/update', { roleId, menuIds });
+}
 export function getRoleAPIsApi(roleId: number) {
   return requestClient.post<{ apiIds: number[] }>('/role/api/get', { roleId });
 }

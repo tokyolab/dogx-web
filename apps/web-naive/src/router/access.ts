@@ -27,6 +27,7 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
     IFrameView,
   };
 
+  let accessCodes: string[] = [];
   let navigationTree: RouteRecordStringComponent[] = [];
   let databaseNames = new Set<string>();
   // This is an application routing contract, not a user preference. Old persisted
@@ -42,6 +43,7 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
       if (generation !== getAccessGeneration()) {
         throw new Error('Navigation initialization cancelled');
       }
+      accessCodes = response.permissions;
       const navigation = createNavigation(response.items, [
         ...routes,
         ...options.routes,
@@ -70,6 +72,7 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
   ];
   return {
     ...result,
+    accessCodes,
     accessibleMenus: generateMenus(menuRoutes, options.router),
   };
 }

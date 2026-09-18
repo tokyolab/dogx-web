@@ -98,16 +98,18 @@ function setupAccessGuard(router: Router) {
     const userRoles = userInfo.roles ?? [];
 
     // 生成菜单和路由
-    const { accessibleMenus, accessibleRoutes } = await generateAccess({
-      roles: userRoles,
-      router,
-      // 则会在菜单中显示，但是访问会被重定向到403
-      routes: accessRoutes,
-    });
+    const { accessibleMenus, accessibleRoutes, accessCodes } =
+      await generateAccess({
+        roles: userRoles,
+        router,
+        // 则会在菜单中显示，但是访问会被重定向到403
+        routes: accessRoutes,
+      });
 
     if (generation !== getAccessGeneration()) return false;
 
     // 保存菜单信息和路由信息
+    accessStore.setAccessCodes(accessCodes);
     accessStore.setAccessMenus(accessibleMenus);
     accessStore.setAccessRoutes(accessibleRoutes);
     accessStore.setIsAccessChecked(true);

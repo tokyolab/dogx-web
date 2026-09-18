@@ -26,6 +26,7 @@ import {
 } from '#/api/system';
 
 import APIPermissionModal from './api-permission-modal.vue';
+import MenuPermissionModal from './menu-permission-modal.vue';
 import RoleFormModal from './role-form-modal.vue';
 
 const statusUpdatingRoleID = ref<number>();
@@ -36,6 +37,10 @@ const [RoleModal, roleModalApi] = useVbenModal({
 });
 const [PermissionModal, permissionModalApi] = useVbenModal({
   connectedComponent: APIPermissionModal,
+});
+
+const [MenuModal, menuModalApi] = useVbenModal({
+  connectedComponent: MenuPermissionModal,
 });
 
 const formOptions = {
@@ -99,7 +104,7 @@ const gridOptions: VxeTableGridOptions<RoleApi.RoleItem> = {
       fixed: 'right',
       slots: { default: 'operation' },
       title: $t('page.system.role.operation'),
-      width: 310,
+      width: 390,
     },
   ],
   height: 'auto',
@@ -202,6 +207,7 @@ async function deleteRole(record: RoleApi.RoleItem) {
   <Page auto-content-height>
     <RoleModal />
     <PermissionModal />
+    <MenuModal />
 
     <Grid>
       <template #toolbar-actions>
@@ -291,6 +297,34 @@ async function deleteRole(record: RoleApi.RoleItem) {
             }}
           </NTooltip>
 
+          <NTooltip
+            :disabled="row.status === 1 && row.code !== SUPER_ADMIN_ROLE_CODE"
+          >
+            <template #trigger>
+              <span>
+                <NButton
+                  :disabled="
+                    row.status !== 1 || row.code === SUPER_ADMIN_ROLE_CODE
+                  "
+                  quaternary
+                  size="small"
+                  type="primary"
+                  @click="menuModalApi.setData({ record: row }).open()"
+                >
+                  {{
+                    row.code === SUPER_ADMIN_ROLE_CODE
+                      ? $t('page.system.role.allMenus')
+                      : $t('page.system.role.menuPermission')
+                  }}
+                </NButton>
+              </span>
+            </template>
+            {{
+              row.code === SUPER_ADMIN_ROLE_CODE
+                ? $t('page.system.role.superAdminMenuHelp')
+                : $t('page.system.role.disabledMenuHelp')
+            }}
+          </NTooltip>
           <NTooltip :disabled="!row.isSystem">
             <template #trigger>
               <span>

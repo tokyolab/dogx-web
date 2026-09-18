@@ -300,13 +300,15 @@ defineExpose(modalApi);
   <Modal>
     <Form>
       <template #roleIds="{ value, handleChange }">
-        <!-- Mount after initialization so opening an edit form never loads role options. -->
+        <!-- Keep the slot non-empty before initialization and on close;
+             otherwise Vben mounts the schema selector and loads options again. -->
         <UserRoleSelect
           v-if="ready"
           :disabled="submitting"
           :value="value ?? []"
           @update:value="handleChange"
         />
+        <span v-else></span>
       </template>
     </Form>
   </Modal>

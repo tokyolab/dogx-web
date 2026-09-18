@@ -45,6 +45,7 @@ describe('mixed navigation with real Vben routing', () => {
       routes: createInitialRoutes(),
     });
     mocks.menus.mockResolvedValue({
+      permissions: ['user.view'],
       items: [
         item(1, 0, { type: 1, component: '', keepAlive: false }),
         item(2, 1, { visible: false }),
@@ -57,6 +58,7 @@ describe('mixed navigation with real Vben routing', () => {
       routes: accessRoutes,
       roles: [],
     });
+    expect(result.accessCodes).toEqual(['user.view']);
     expect(mocks.menus).toHaveBeenCalledOnce();
     expect(router.hasRoute('Analytics')).toBe(true);
     expect(router.hasRoute('Profile')).toBe(true);
@@ -85,8 +87,13 @@ describe('mixed navigation with real Vben routing', () => {
     expect(router.hasRoute('Database2')).toBe(false);
     expect(router.hasRoute('Analytics')).toBe(false);
     expect(router.hasRoute('Login')).toBe(true);
-    mocks.menus.mockResolvedValue({ items: [] });
-    await generateAccess({ router, routes: accessRoutes, roles: [] });
+    mocks.menus.mockResolvedValue({ items: [], permissions: [] });
+    const reloaded = await generateAccess({
+      router,
+      routes: accessRoutes,
+      roles: [],
+    });
+    expect(reloaded.accessCodes).toEqual([]);
     expect(router.hasRoute('Database3')).toBe(false);
     expect(router.resolve('/database-3').name).toBe('FallbackNotFound');
     expect(router.hasRoute('Analytics')).toBe(true);

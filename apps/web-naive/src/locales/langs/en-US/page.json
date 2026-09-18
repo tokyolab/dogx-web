@@ -146,6 +146,17 @@
       "selfDeleteHelp": "You cannot delete your own account"
     },
     "role": {
+      "menuPermission": "Menu permissions",
+      "allMenus": "All menus",
+      "superAdminMenuHelp": "The super administrator always has all menus",
+      "disabledMenuHelp": "Enable the role before configuring menu permissions",
+      "searchMenuPlaceholder": "Enter a menu name",
+      "selectAllMenus": "Select all",
+      "clearMenus": "Clear",
+      "noMenus": "No menus",
+      "menuPermissionSaved": "Menu permissions saved",
+      "discardMenuPermissionContent": "Unsaved menu permission changes will be lost.",
+      "menuPermissionHelp": "Menu and API permissions are independent. Disabled nodes retain grants but are inactive. Refresh the browser to update menus.",
       "title": "Role Management",
       "keyword": "Role",
       "keywordPlaceholder": "Enter a role name or code",

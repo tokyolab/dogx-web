@@ -146,6 +146,17 @@
       "selfDeleteHelp": "不能删除当前登录账号"
     },
     "role": {
+      "menuPermission": "菜单权限",
+      "allMenus": "全部菜单",
+      "superAdminMenuHelp": "超级管理员拥有全部菜单，无需配置菜单权限",
+      "disabledMenuHelp": "请先启用角色，再配置菜单权限",
+      "searchMenuPlaceholder": "请输入菜单名称",
+      "selectAllMenus": "全选",
+      "clearMenus": "清空",
+      "noMenus": "暂无菜单",
+      "menuPermissionSaved": "菜单权限保存成功",
+      "discardMenuPermissionContent": "菜单权限尚未保存，关闭后本次修改将丢失。",
+      "menuPermissionHelp": "菜单与接口独立授权。停用节点不生效，保留其授权。已登录用户刷新页面后更新菜单。",
       "title": "角色管理",
       "keyword": "角色",
       "keywordPlaceholder": "请输入角色名称或编码",

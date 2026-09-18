@@ -16,5 +16,7 @@ export interface NavigationMenu {
 }
 
 export async function getNavigationMenusApi() {
-  return requestClient.post<{ items: NavigationMenu[] }>('/auth/menus');
+  return requestClient.post<{ items: NavigationMenu[]; permissions: string[] }>(
+    '/auth/menus',
+  );
 }
