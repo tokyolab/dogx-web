@@ -162,7 +162,7 @@ const [Modal, modalApi] = useVbenModal({
     try {
       await updateRoleAPIsApi(currentRole.value.id, selectedAPIIDs.value);
       initialAPIIDs.value = [...selectedAPIIDs.value];
-      message.success($t('page.system.role.permissionUpdateSuccess'));
+      message.success($t('common.saveSuccess'));
       modalApi.close();
     } finally {
       modalApi.unlock();

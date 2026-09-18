@@ -4,6 +4,7 @@ import type { VbenFormSchema } from '#/adapter/form';
 import { computed } from 'vue';
 
 import { ProfilePasswordSetting, z } from '@vben/common-ui';
+import { $t } from '@vben/locales';
 
 import { message } from '#/adapter/naive';
 
@@ -51,7 +52,7 @@ const formSchema = computed((): VbenFormSchema[] => {
 });
 
 function handleSubmit() {
-  message.success('密码修改成功');
+  message.success($t('common.saveSuccess'));
 }
 </script>
 <template>

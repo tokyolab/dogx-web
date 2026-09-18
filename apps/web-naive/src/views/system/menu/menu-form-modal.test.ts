@@ -9,6 +9,7 @@ import MenuFormModal from './menu-form-modal.vue';
 
 const mocks = vi.hoisted(() => ({
   create: vi.fn(),
+  success: vi.fn(),
   update: vi.fn(),
   get: vi.fn(),
   useModal: vi.fn(),
@@ -26,7 +27,7 @@ vi.mock('#/adapter/form', async () => {
 });
 vi.mock('#/adapter/naive', () => ({
   dialog: { warning: mocks.warning },
-  message: { success: vi.fn() },
+  message: { success: mocks.success },
 }));
 vi.mock('#/api/system/menu', () => ({
   createMenuApi: mocks.create,
@@ -124,6 +125,7 @@ describe('menu modal lifecycle', () => {
       }),
     );
     expect(mocks.update.mock.calls[0]?.[0]).not.toHaveProperty('status');
+    expect(mocks.success).toHaveBeenCalledExactlyOnceWith('common.saveSuccess');
   });
   it('guards duplicate submissions before asynchronous validation completes', async () => {
     await hooks.onOpenChange(true);
@@ -140,6 +142,7 @@ describe('menu modal lifecycle', () => {
     resolve({ valid: true });
     await first;
     expect(mocks.create).toHaveBeenCalledTimes(1);
+    expect(mocks.success).toHaveBeenCalledExactlyOnceWith('common.saveSuccess');
   });
   it('keeps the form open after save failure and releases its lock', async () => {
     await hooks.onOpenChange(true);

@@ -236,9 +236,7 @@ async function changeStatus(record: UserApi.UserItem) {
   try {
     await updateUserStatusApi(record.id, status);
     message.success(
-      $t(
-        status === 1 ? 'page.system.user.enabled' : 'page.system.user.disabled',
-      ),
+      $t(status === 1 ? 'common.enableSuccess' : 'common.disableSuccess'),
     );
     await gridApi.reload();
   } finally {
@@ -255,7 +253,7 @@ async function removeUser(record: UserApi.UserItem) {
   deletingID.value = record.id;
   try {
     await deleteUserApi(record.id);
-    message.success($t('page.system.user.deleted'));
+    message.success($t('common.deleteSuccess'));
     await gridApi.reload();
   } finally {
     deletingID.value = undefined;

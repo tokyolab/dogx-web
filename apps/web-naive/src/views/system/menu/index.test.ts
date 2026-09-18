@@ -189,9 +189,7 @@ describe('menu list actions', () => {
       request.resolve();
       await flush();
       expect(mocks.success).toHaveBeenCalledExactlyOnceWith(
-        status === 1
-          ? 'page.system.menu.disableSuccess'
-          : 'page.system.menu.enableSuccess',
+        status === 1 ? 'common.disableSuccess' : 'common.enableSuccess',
       );
       expect(mocks.query).toHaveBeenCalledTimes(1);
       expect(button('common.delete').disabled).toBe(true);
@@ -251,7 +249,7 @@ describe('menu list actions', () => {
     request.resolve();
     await flush();
     expect(mocks.success).toHaveBeenCalledExactlyOnceWith(
-      'page.system.menu.deleteSuccess',
+      'common.deleteSuccess',
     );
     expect(mocks.query).toHaveBeenCalledTimes(1);
     expect(mocks.updateStatus).not.toHaveBeenCalled();

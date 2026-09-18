@@ -55,23 +55,21 @@ const [Modal, modalApi] = useVbenModal({
       message.warning($t('page.system.user.tooManyRoles'));
       return;
     }
-    if (initial === snapshot()) {
-      modalApi.close();
-      return;
-    }
+    // Always submit; compare only to avoid logging out on an unchanged self-save.
+    const rolesChanged = initial !== snapshot();
     const id = record.value.id;
     submitting.value = true;
     modalApi.lock();
     try {
       await updateUserRolesApi(id, selected.value);
       initial = snapshot();
-      message.success($t('page.system.user.rolesSaved'));
+      message.success($t('common.saveSuccess'));
     } finally {
       submitting.value = false;
       modalApi.unlock();
     }
     modalApi.close();
-    await (id === Number(userStore.userInfo?.userId)
+    await (rolesChanged && id === Number(userStore.userInfo?.userId)
       ? authStore.logout(false, false)
       : modalApi.getData<ModalData>()?.onSuccess?.());
   },

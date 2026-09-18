@@ -154,10 +154,11 @@ function confirmMutation(action: 'delete' | 'status', row: MenuApi.Item) {
 async function mutate(id: number, deleting: boolean, status: number) {
   try {
     await (deleting ? deleteMenuApi(id) : updateMenuStatusApi(id, status));
-    let successKey = 'deleteSuccess';
+    let successKey = 'common.deleteSuccess';
     if (!deleting)
-      successKey = status === 1 ? 'enableSuccess' : 'disableSuccess';
-    message.success(t(successKey));
+      successKey =
+        status === 1 ? 'common.enableSuccess' : 'common.disableSuccess';
+    message.success($t(successKey));
     await gridApi.query();
   } finally {
     pending.value = undefined;

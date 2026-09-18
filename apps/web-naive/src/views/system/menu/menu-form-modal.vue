@@ -83,7 +83,7 @@ const [Modal, modalApi] = useVbenModal({
         ? updateMenuApi({ ...payload, id: currentID.value })
         : createMenuApi({ ...payload, status: values.status ?? 1 }));
       initial = menuSnapshot(values, !!currentID.value);
-      message.success($t('page.system.menu.saveSuccess'));
+      message.success($t('common.saveSuccess'));
     } finally {
       submitting.value = false;
       modalApi.unlock();

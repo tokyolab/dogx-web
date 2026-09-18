@@ -177,9 +177,7 @@ async function updateStatus(record: RoleApi.RoleItem) {
   try {
     await updateRoleStatusApi({ id: record.id, status });
     message.success(
-      status === 1
-        ? $t('page.system.role.enableSuccess')
-        : $t('page.system.role.disableSuccess'),
+      $t(status === 1 ? 'common.enableSuccess' : 'common.disableSuccess'),
     );
     await gridApi.reload();
     return true;
@@ -194,7 +192,7 @@ async function deleteRole(record: RoleApi.RoleItem) {
   deletingRoleID.value = record.id;
   try {
     await deleteRoleApi(record.id);
-    message.success($t('page.system.role.deleteSuccess'));
+    message.success($t('common.deleteSuccess'));
     await gridApi.reload();
     return true;
   } finally {

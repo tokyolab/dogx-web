@@ -193,25 +193,22 @@ const [Modal, modalApi] = useVbenModal({
     const data = modalApi.getData<RoleFormModalData>();
     modalApi.lock();
     try {
-      if (currentRecord.value) {
-        await updateRoleApi({
-          code: values.code.trim(),
-          description: values.description.trim(),
-          id: currentRecord.value.id,
-          name: values.name.trim(),
-          sort: values.sort,
-        });
-        message.success($t('page.system.role.updateSuccess'));
-      } else {
-        await createRoleApi({
-          code: values.code.trim(),
-          description: values.description.trim(),
-          name: values.name.trim(),
-          sort: values.sort,
-          status: values.status ?? 1,
-        });
-        message.success($t('page.system.role.createSuccess'));
-      }
+      await (currentRecord.value
+        ? updateRoleApi({
+            code: values.code.trim(),
+            description: values.description.trim(),
+            id: currentRecord.value.id,
+            name: values.name.trim(),
+            sort: values.sort,
+          })
+        : createRoleApi({
+            code: values.code.trim(),
+            description: values.description.trim(),
+            name: values.name.trim(),
+            sort: values.sort,
+            status: values.status ?? 1,
+          }));
+      message.success($t('common.saveSuccess'));
       initialSnapshot.value = toSnapshot(values);
       await data?.onSuccess?.();
       modalApi.close();

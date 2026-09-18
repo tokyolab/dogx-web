@@ -19,6 +19,7 @@ import UserFormModal from './user-form-modal.vue';
 const mocks = vi.hoisted(() => ({
   createUser: vi.fn(),
   getUser: vi.fn(),
+  success: vi.fn(),
   messageWarning: vi.fn(),
   roleSelect: vi.fn(),
   updateUser: vi.fn(),
@@ -38,7 +39,7 @@ vi.mock('#/adapter/form', async () => {
 vi.mock('@vben/locales', () => ({ $t: (key: string) => key }));
 vi.mock('#/adapter/naive', () => ({
   dialog: { warning: mocks.warning },
-  message: { success: vi.fn(), warning: mocks.messageWarning },
+  message: { success: mocks.success, warning: mocks.messageWarning },
 }));
 vi.mock('#/api/system', () => ({
   createUserApi: mocks.createUser,
@@ -244,6 +245,7 @@ describe('user form role field', () => {
       expect.objectContaining({ roleIds: values.roleIds }),
     );
     expect(mocks.messageWarning).not.toHaveBeenCalled();
+    expect(mocks.success).toHaveBeenCalledExactlyOnceWith('common.saveSuccess');
   });
 
   it('keeps the existing warning and blocks submission above 100 roles', async () => {
@@ -453,6 +455,7 @@ describe('user form unsaved changes', () => {
     await open(42);
     values.nickname = 'Updated Administrator';
     await hooks.onConfirm();
+    expect(mocks.success).toHaveBeenCalledExactlyOnceWith('common.saveSuccess');
     expect(mocks.updateUser).toHaveBeenCalledWith({
       email: '',
       id: 42,

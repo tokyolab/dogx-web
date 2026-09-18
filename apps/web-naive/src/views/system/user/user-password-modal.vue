@@ -77,7 +77,7 @@ const [Modal, modalApi] = useVbenModal({
       const { password } = await formApi.getValues<{ password: string }>();
       await resetUserPasswordApi(data.id, password);
       saved = true;
-      message.success($t('page.system.user.passwordReset'));
+      message.success($t('common.passwordResetSuccess'));
     } finally {
       submitting.value = false;
       modalApi.unlock();

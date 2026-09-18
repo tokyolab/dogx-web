@@ -238,7 +238,7 @@ describe('reset password unsaved changes', () => {
       expect(open).toBe(false);
       expect(mocks.warning).not.toHaveBeenCalled();
       expect(mocks.success).toHaveBeenCalledExactlyOnceWith(
-        'page.system.user.passwordReset',
+        'common.passwordResetSuccess',
       );
       expect(mocks.logout.mock.calls).toEqual(logoutCalls);
     },

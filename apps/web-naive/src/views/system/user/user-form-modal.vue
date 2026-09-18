@@ -231,7 +231,7 @@ const [Modal, modalApi] = useVbenModal({
             username: values.username,
           }));
       initial = snapshot(values);
-      message.success($t('page.system.user.saveSuccess'));
+      message.success($t('common.saveSuccess'));
     } finally {
       submitting.value = false;
       modalApi.unlock();

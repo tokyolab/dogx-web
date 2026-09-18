@@ -10,6 +10,7 @@ import MenuPermissionModal from './menu-permission-modal.vue';
 const mocks = vi.hoisted(() => ({
   get: vi.fn(),
   save: vi.fn(),
+  success: vi.fn(),
   modal: vi.fn(),
   warning: vi.fn(),
 }));
@@ -17,7 +18,7 @@ vi.mock('@vben/locales', () => ({ $t: (key: string) => key }));
 vi.mock('@vben/common-ui', () => ({ useVbenModal: mocks.modal }));
 vi.mock('#/adapter/naive', () => ({
   dialog: { warning: mocks.warning },
-  message: { success: vi.fn() },
+  message: { success: mocks.success },
 }));
 vi.mock('#/api/system', () => ({
   getRoleMenusApi: mocks.get,
@@ -118,6 +119,9 @@ describe('menu permission modal', () => {
       await hooks.onOpenChange(true);
       await hooks.onConfirm();
       expect(mocks.save).toHaveBeenCalledExactlyOnceWith(9, menuIds);
+      expect(mocks.success).toHaveBeenCalledExactlyOnceWith(
+        'common.saveSuccess',
+      );
       expect(api.lock).toHaveBeenCalledOnce();
       expect(api.unlock).toHaveBeenCalledOnce();
       expect(api.close).toHaveBeenCalledOnce();
@@ -176,6 +180,7 @@ describe('menu permission modal', () => {
     await clearSelection();
     await hooks.onConfirm();
     expect(mocks.save).toHaveBeenCalledWith(9, []);
+    expect(mocks.success).toHaveBeenCalledExactlyOnceWith('common.saveSuccess');
     expect(await hooks.onBeforeClose()).toBe(true);
     expect(api.close).toHaveBeenCalledOnce();
   });

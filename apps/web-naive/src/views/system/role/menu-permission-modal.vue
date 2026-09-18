@@ -97,7 +97,7 @@ const [Modal, modalApi] = useVbenModal({
     try {
       await updateRoleMenusApi(role.value.id, selected.value);
       initial.value = [...selected.value];
-      message.success($t('page.system.role.menuPermissionSaved'));
+      message.success($t('common.saveSuccess'));
       saving.value = false;
       modalApi.close();
     } finally {
