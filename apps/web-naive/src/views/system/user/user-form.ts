@@ -36,6 +36,7 @@ export function mergeRoleOptions(
 
 export function normalizeUserProfile(values: UserApi.Profile): UserApi.Profile {
   return {
+    departmentId: values.departmentId ?? 0,
     email: values.email?.trim() ?? '',
     nickname: values.nickname?.trim() ?? '',
     phone: values.phone?.trim() ?? '',

@@ -4,9 +4,9 @@ import type { DropdownOption } from 'naive-ui';
 import type { VNode } from 'vue';
 
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
-import type { UserApi } from '#/api/system';
+import type { DepartmentApi, UserApi } from '#/api/system';
 
-import { h, ref } from 'vue';
+import { h, onMounted, ref } from 'vue';
 
 import { Page, useVbenModal } from '@vben/common-ui';
 import { ChevronDown } from '@vben/icons';
@@ -26,7 +26,9 @@ import {
 import { dialog, message } from '#/adapter/naive';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteUserApi, listUsersApi, updateUserStatusApi } from '#/api/system';
+import { listUserDepartmentOptionsApi } from '#/api/system/department';
 
+import { departmentOptions } from '../department/department-tree';
 import { userActionAvailability } from './user-form';
 import UserFormModal from './user-form-modal.vue';
 import UserPasswordModal from './user-password-modal.vue';
@@ -34,6 +36,23 @@ import UserRoleTags from './user-role-tags.vue';
 import UserRolesModal from './user-roles-modal.vue';
 
 const userStore = useUserStore();
+const departments = ref<DepartmentApi.Item[]>([]);
+let departmentRequest: Promise<DepartmentApi.Item[]> | undefined;
+// The search form and user modal share this page-scoped request and result.
+function getDepartments() {
+  return (departmentRequest ??= listUserDepartmentOptionsApi()
+    .then((result) => {
+      departments.value = result.items;
+      return result.items;
+    })
+    .catch((error: unknown) => {
+      departmentRequest = undefined;
+      throw error;
+    }));
+}
+onMounted(() => {
+  void getDepartments().catch(() => undefined);
+});
 const statusID = ref<number>();
 const deletingID = ref<number>();
 const [FormModal, formModalApi] = useVbenModal({
@@ -65,6 +84,11 @@ const gridOptions: VxeTableGridOptions<UserApi.UserItem> = {
       showOverflow: 'ellipsis',
       slots: { default: 'roles' },
       title: $t('page.system.user.roles'),
+    },
+    {
+      field: 'departmentName',
+      minWidth: 160,
+      title: $t('page.system.user.department'),
     },
     {
       field: 'status',
@@ -104,6 +128,10 @@ const gridOptions: VxeTableGridOptions<UserApi.UserItem> = {
     ajax: {
       query: async ({ page }, values) =>
         listUsersApi({
+          departmentId:
+            typeof values.departmentId === 'number' && values.departmentId > 0
+              ? values.departmentId
+              : undefined,
           keyword: String(values.keyword ?? '').trim(),
           page: page.currentPage,
           pageSize: page.pageSize,
@@ -119,6 +147,17 @@ const [Grid, gridApi] = useVbenVxeGrid<UserApi.UserItem>({
   gridOptions,
   formOptions: {
     schema: [
+      {
+        component: 'TreeSelect',
+        fieldName: 'departmentId',
+        label: $t('page.system.user.department'),
+        componentProps: () => ({
+          options: departmentOptions(departments.value),
+          clearable: true,
+          filterable: true,
+          placeholder: $t('page.system.user.departmentFilterPlaceholder'),
+        }),
+      },
       {
         component: 'Input',
         componentProps: {
@@ -148,7 +187,9 @@ const [Grid, gridApi] = useVbenVxeGrid<UserApi.UserItem>({
 });
 
 function openUser(id?: number) {
-  formModalApi.setData({ id, onSuccess: () => gridApi.reload() }).open();
+  formModalApi
+    .setData({ id, getDepartments, onSuccess: () => gridApi.reload() })
+    .open();
 }
 function openRoles(id: number) {
   rolesModalApi.setData({ id, onSuccess: () => gridApi.reload() }).open();

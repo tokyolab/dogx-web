@@ -61,6 +61,9 @@ vi.mock('#/api/system', () => ({
   listUsersApi: vi.fn(),
   updateUserStatusApi: mocks.updateUserStatus,
 }));
+vi.mock('#/api/system/department', () => ({
+  listUserDepartmentOptionsApi: vi.fn().mockResolvedValue({ items: [] }),
+}));
 vi.mock('#/api/system/role', () => ({ SUPER_ADMIN_ROLE_CODE: 'super_admin' }));
 vi.mock('./user-form-modal.vue', () => ({ default: () => h('div') }));
 vi.mock('./user-password-modal.vue', () => ({ default: () => h('div') }));
@@ -81,6 +84,8 @@ beforeEach(() => {
   mocks.operatorID = 1;
   record = {
     createdAt: '',
+    departmentId: 1,
+    departmentName: 'Default',
     email: '',
     id: 9,
     lastLoginAt: '',

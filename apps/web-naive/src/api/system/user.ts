@@ -9,6 +9,8 @@ export namespace UserApi {
   }
 
   export interface UserItem {
+    departmentId: number;
+    departmentName: string;
     createdAt: string;
     email: string;
     id: number;
@@ -23,6 +25,7 @@ export namespace UserApi {
   }
 
   export interface ListParams {
+    departmentId?: number;
     keyword?: string;
     page: number;
     pageSize: number;
@@ -30,6 +33,7 @@ export namespace UserApi {
   }
 
   export interface Profile {
+    departmentId: number;
     email: string;
     nickname: string;
     phone: string;

@@ -76,6 +76,8 @@ const modalApi = {
 beforeEach(() => {
   vi.clearAllMocks();
   record = {
+    departmentId: 1,
+    departmentName: 'Default',
     id: 42,
     username: 'reader',
     nickname: 'Reader',

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { VbenFormSchema } from '#/adapter/form';
-import type { UserApi } from '#/api/system';
+import type { DepartmentApi, UserApi } from '#/api/system';
 
 import { markRaw, nextTick, ref } from 'vue';
 
@@ -13,10 +13,12 @@ import { createUserApi, getManagedUserApi, updateUserApi } from '#/api/system';
 import { isValidNewPassword } from '#/utils/password';
 import { isValidUsername, MAX_USERNAME_CHARACTERS } from '#/utils/username';
 
+import { departmentOptions } from '../department/department-tree';
 import { normalizeUserProfile } from './user-form';
 import UserRoleSelect from './user-role-select.vue';
 
 interface ModalData {
+  getDepartments?: () => Promise<DepartmentApi.Item[]>;
   id?: number;
   onSuccess?: () => Promise<void> | void;
 }
@@ -33,7 +35,11 @@ const ready = ref(false);
 let initial = '';
 let generation = 0;
 
-function createSchema(editing: boolean): VbenFormSchema[] {
+function createSchema(
+  editing: boolean,
+  departments: DepartmentApi.Item[] = [],
+  departmentID?: number,
+): VbenFormSchema[] {
   const requiredText = (label: string, max: number) =>
     z
       .string()
@@ -95,6 +101,24 @@ function createSchema(editing: boolean): VbenFormSchema[] {
       },
     );
   schema.push(
+    {
+      component: 'TreeSelect',
+      fieldName: 'departmentId',
+      label: $t('page.system.user.department'),
+      componentProps: {
+        options: departmentOptions(departments, departmentID, true),
+        filterable: true,
+        clearable: true,
+        placeholder: $t('page.system.user.departmentPlaceholder'),
+      },
+      rules: z
+        .number({
+          required_error: $t('page.system.user.departmentRequired'),
+          invalid_type_error: $t('page.system.user.departmentRequired'),
+        })
+        .int()
+        .positive($t('page.system.user.departmentRequired')),
+    },
     {
       component: 'Input',
       componentProps: {
@@ -258,13 +282,28 @@ const [Modal, modalApi] = useVbenModal({
           : 'page.system.user.createTitle',
       ),
     });
-    formApi.setState({ schema: createSchema(!!currentID.value) });
     try {
+      const [departments, record] = await Promise.all([
+        modalApi.getData<ModalData>()?.getDepartments?.() ??
+          Promise.resolve([]),
+        currentID.value
+          ? getManagedUserApi(currentID.value)
+          : Promise.resolve(undefined),
+      ]);
+      if (token !== generation) return;
+      formApi.setState({
+        schema: createSchema(
+          !!currentID.value,
+          departments,
+          record?.departmentId,
+        ),
+      });
       await nextTick();
       if (token !== generation) return;
       await formApi.resetForm();
       if (token !== generation) return;
       const values: FormValues = {
+        departmentId: 0,
         email: '',
         nickname: '',
         password: '',
@@ -274,8 +313,7 @@ const [Modal, modalApi] = useVbenModal({
         status: 1,
         username: '',
       };
-      if (currentID.value)
-        Object.assign(values, await getManagedUserApi(currentID.value));
+      if (record) Object.assign(values, record);
       if (token !== generation) return;
       await formApi.setValues(values);
       if (token !== generation) return;

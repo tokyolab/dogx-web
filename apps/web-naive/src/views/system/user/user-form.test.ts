@@ -86,12 +86,14 @@ describe('user management forms', () => {
   it('sends explicit empty values when clearing optional profile fields', () => {
     expect(
       normalizeUserProfile({
+        departmentId: 1,
         email: ' ',
         nickname: ' 昵称 ',
         phone: '',
         remark: ' ',
       }),
     ).toEqual({
+      departmentId: 1,
       email: '',
       nickname: '昵称',
       phone: '',
@@ -101,6 +103,7 @@ describe('user management forms', () => {
 
   it('keeps credential, status and role fields out of profile updates', () => {
     const values = {
+      departmentId: 1,
       email: '',
       nickname: 'Alice',
       password: 'secret',
@@ -111,6 +114,7 @@ describe('user management forms', () => {
       username: 'alice',
     };
     expect(normalizeUserProfile(values)).toEqual({
+      departmentId: 1,
       email: '',
       nickname: 'Alice',
       phone: '',

@@ -188,6 +188,7 @@ describe('user form role field', () => {
       'nickname',
       'password',
       'roleIds',
+      'departmentId',
       'email',
       'phone',
       'remark',
@@ -457,6 +458,7 @@ describe('user form unsaved changes', () => {
     await hooks.onConfirm();
     expect(mocks.success).toHaveBeenCalledExactlyOnceWith('common.saveSuccess');
     expect(mocks.updateUser).toHaveBeenCalledWith({
+      departmentId: 0,
       email: '',
       id: 42,
       nickname: 'Updated Administrator',
