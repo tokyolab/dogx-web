@@ -31,3 +31,27 @@ export async function getUserInfoApi() {
 
 export { toUserInfo };
 export type { CurrentUserResult };
+
+export interface ProfileUpdate {
+  nickname: string;
+  email: string;
+  phone: string;
+}
+
+export interface PersonalProfile extends ProfileUpdate {
+  username: string;
+  departmentName: string;
+  roles: string[];
+}
+
+export function getProfileApi() {
+  return requestClient.post<PersonalProfile>('/auth/profile');
+}
+
+export function updateProfileApi(data: ProfileUpdate) {
+  return requestClient.post('/auth/profile/update', {
+    nickname: data.nickname.trim(),
+    email: data.email?.trim() ?? '',
+    phone: data.phone?.trim() ?? '',
+  });
+}

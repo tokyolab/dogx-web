@@ -37,3 +37,13 @@ export async function refreshTokenApi(refreshToken: string) {
 export async function logoutApi() {
   return requestClient.post('/auth/logout');
 }
+
+export function changePasswordApi(
+  currentPassword: string,
+  newPassword: string,
+) {
+  return requestClient.post('/auth/change-password', {
+    currentPassword,
+    newPassword,
+  });
+}

@@ -1,0 +1,12 @@
+{
+  "title": "个人中心",
+  "basicSettings": "基本资料",
+  "updatePassword": "修改密码",
+  "currentPassword": "当前密码",
+  "currentPasswordPlaceholder": "请输入当前密码",
+  "confirmPassword": "确认密码",
+  "confirmPasswordPlaceholder": "请再次输入新密码",
+  "passwordMismatch": "两次输入的密码不一致",
+  "passwordLogoutHelp": "修改密码后，需要重新登录。",
+  "retry": "重新加载"
+}

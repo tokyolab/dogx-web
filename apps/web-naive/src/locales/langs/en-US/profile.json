@@ -1,0 +1,12 @@
+{
+  "title": "Personal Center",
+  "basicSettings": "Profile",
+  "updatePassword": "Change Password",
+  "currentPassword": "Current Password",
+  "currentPasswordPlaceholder": "Enter your current password",
+  "confirmPassword": "Confirm Password",
+  "confirmPasswordPlaceholder": "Enter the new password again",
+  "passwordMismatch": "The passwords do not match",
+  "passwordLogoutHelp": "You will need to sign in again after changing your password.",
+  "retry": "Reload"
+}
