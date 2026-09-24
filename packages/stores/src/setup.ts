@@ -5,7 +5,11 @@ import type { App } from 'vue';
 import { createPinia } from 'pinia';
 import SecureLS from 'secure-ls';
 
+import { createCredentialPersistence } from './credential-sync';
+import { useAccessStore } from './modules/access';
+
 let pinia: Pinia;
+let disposeCredentialSync: (() => void) | undefined;
 
 type SecureLSStorage = {
   get(key: string): any;
@@ -49,23 +53,28 @@ export async function initStores(app: App, options: InitStoreOptions) {
     isCompression: true,
     metaKey: `${namespace}-secure-meta`,
   });
+  const credentialPersistence = createCredentialPersistence(
+    import.meta.env.DEV
+      ? localStorage
+      : {
+          getItem: (key) => ls.get(key),
+          setItem: (key, value) => ls.set(key, value),
+        },
+    `${namespace}-core-access`,
+  );
   pinia.use(
     createPersistedState({
       // key $appName-$store.id
       key: (storeKey) => `${namespace}-${storeKey}`,
-      storage: import.meta.env.DEV
-        ? localStorage
-        : {
-            getItem(key) {
-              return ls.get(key);
-            },
-            setItem(key, value) {
-              ls.set(key, value);
-            },
-          },
+      storage: credentialPersistence.adapter,
     }),
   );
   app.use(pinia);
+  disposeCredentialSync?.();
+  const accessStore = useAccessStore(pinia);
+  disposeCredentialSync = credentialPersistence.bind(accessStore, () =>
+    window.location.reload(),
+  );
   return pinia;
 }
 
@@ -75,6 +84,7 @@ export function resetAllStores() {
     return;
   }
   const allStores = (pinia as any)._s;
+  useAccessStore(pinia).clearCredentials();
   for (const [_key, store] of allStores) {
     store.$reset();
   }

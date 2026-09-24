@@ -3,10 +3,13 @@
  */
 import type { RequestClientOptions } from '@vben/request';
 
+import type { AuthFailure } from './credential-refresh';
+
 import { useAppConfig } from '@vben/hooks';
 import { preferences } from '@vben/preferences';
 import {
   authenticateResponseInterceptor,
+  CanceledError,
   defaultResponseInterceptor,
   errorMessageResponseInterceptor,
   RequestClient,
@@ -15,6 +18,11 @@ import { useAccessStore } from '@vben/stores';
 
 import { message } from '#/adapter/naive';
 import { useAuthStore } from '#/store';
+
+import {
+  createCredentialRefresh,
+  credentialSnapshot,
+} from './credential-refresh';
 
 const { apiURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 
@@ -33,8 +41,11 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   /**
    * 重新认证逻辑
    */
-  async function doReAuthenticate() {
-    console.warn('Access token or refresh token is invalid or expired. ');
+  async function doReAuthenticate(
+    error?: AuthFailure,
+    refreshError?: AuthFailure,
+  ) {
+    if (!refreshCoordinator().shouldReauthenticate(error, refreshError)) return;
     const accessStore = useAccessStore();
     const authStore = useAuthStore();
     accessStore.clearCredentials();
@@ -51,19 +62,19 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   /**
    * 刷新token逻辑
    */
-  async function doRefreshToken() {
-    const accessStore = useAccessStore();
-    const refreshToken = accessStore.refreshToken;
-    if (!refreshToken) {
-      throw new Error('Refresh token is unavailable.');
-    }
-
-    const credentials = await baseRequestClient.post<CredentialsResponse>(
-      '/auth/refresh',
-      { refreshToken },
+  function refreshCoordinator() {
+    return createCredentialRefresh(useAccessStore(), (refreshToken) =>
+      // The general request() wrapper unwraps errors to response.data, losing
+      // HTTP status. Refresh must distinguish a real 401 from transport/5xx errors.
+      baseRequestClient.instance.post<CredentialsResponse, CredentialsResponse>(
+        '/auth/refresh',
+        { refreshToken },
+      ),
     );
-    accessStore.setCredentials(credentials);
-    return credentials.accessToken;
+  }
+
+  async function doRefreshToken(error?: AuthFailure) {
+    return refreshCoordinator().refresh(error);
   }
 
   function formatToken(token: null | string) {
@@ -74,7 +85,19 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   client.addRequestInterceptor({
     fulfilled: async (config) => {
       const accessStore = useAccessStore();
-
+      const before = credentialSnapshot(accessStore);
+      accessStore.syncCredentials();
+      const snapshot = credentialSnapshot(accessStore);
+      if (before.sessionId && before.sessionId !== snapshot.sessionId) {
+        throw new CanceledError('Authentication session changed');
+      }
+      const previous = (
+        config as typeof config & { authCredentials?: typeof snapshot }
+      ).authCredentials;
+      if (previous?.sessionId && previous.sessionId !== snapshot.sessionId) {
+        throw new CanceledError('Authentication session changed');
+      }
+      Object.assign(config, { authCredentials: snapshot });
       config.headers.Authorization = formatToken(accessStore.accessToken);
       config.headers['Accept-Language'] = preferences.app.locale;
       return config;

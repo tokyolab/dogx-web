@@ -52,8 +52,8 @@ export const authenticateResponseInterceptor = ({
   formatToken,
 }: {
   client: RequestClient;
-  doReAuthenticate: () => Promise<void>;
-  doRefreshToken: () => Promise<string>;
+  doReAuthenticate: (error?: any, refreshError?: any) => Promise<void>;
+  doRefreshToken: (error?: any) => Promise<string>;
   enableRefreshToken: boolean;
   formatToken: (token: string) => null | string;
 }): ResponseInterceptorConfig => {
@@ -67,7 +67,7 @@ export const authenticateResponseInterceptor = ({
       // 判断是否启用了 refreshToken 功能
       // 如果没有启用或者已经是重试请求了，直接跳转到重新登录
       if (!enableRefreshToken || config.__isRetryRequest) {
-        await doReAuthenticate();
+        await doReAuthenticate(error);
         throw error;
       }
       // 如果正在刷新 token，则将请求加入队列，等待刷新完成
@@ -90,7 +90,7 @@ export const authenticateResponseInterceptor = ({
       config.__isRetryRequest = true;
 
       try {
-        const newToken = await doRefreshToken();
+        const newToken = await doRefreshToken(error);
 
         // 处理队列中的请求
         client.refreshTokenQueue.forEach((item) => item.resolve(newToken));
@@ -103,8 +103,7 @@ export const authenticateResponseInterceptor = ({
         // 刷新失败时，排队请求统一失败，不使用空 Token 重试。
         client.refreshTokenQueue.forEach((item) => item.reject(refreshError));
         client.refreshTokenQueue = [];
-        console.error('Refresh token failed, please login again.');
-        await doReAuthenticate();
+        await doReAuthenticate(error, refreshError);
 
         throw refreshError;
       } finally {

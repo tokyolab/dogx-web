@@ -4,6 +4,11 @@ import type { MenuRecordRaw } from '@vben-core/typings';
 
 import { acceptHMRUpdate, defineStore } from 'pinia';
 
+import {
+  syncStoredCredentials,
+  writeStoredCredentials,
+} from '../credential-sync';
+
 type AccessToken = null | string;
 
 interface AccessState {
@@ -81,9 +86,14 @@ export const useAccessStore = defineStore('core-access', {
       this.accessCodes = codes;
     },
     clearCredentials() {
-      this.accessToken = null;
-      this.refreshToken = null;
-      this.accessTokenExpiresAt = null;
+      writeStoredCredentials(this, {
+        accessToken: null,
+        refreshToken: null,
+        accessTokenExpiresAt: null,
+      });
+    },
+    syncCredentials() {
+      syncStoredCredentials(this);
     },
     setAccessMenus(menus: MenuRecordRaw[]) {
       this.accessMenus = menus;
@@ -92,19 +102,26 @@ export const useAccessStore = defineStore('core-access', {
       this.accessRoutes = routes;
     },
     setAccessToken(token: AccessToken) {
-      this.accessToken = token;
+      this.syncCredentials();
+      writeStoredCredentials(this, {
+        accessToken: token,
+        refreshToken: this.refreshToken,
+        accessTokenExpiresAt: this.accessTokenExpiresAt,
+      });
     },
     setCredentials(credentials: {
       accessToken: string;
       expiresIn: number;
       refreshToken: string;
     }) {
-      this.accessToken = credentials.accessToken;
-      this.refreshToken = credentials.refreshToken;
-      this.accessTokenExpiresAt =
-        credentials.expiresIn > 0
-          ? Date.now() + credentials.expiresIn * 1000
-          : null;
+      writeStoredCredentials(this, {
+        accessToken: credentials.accessToken,
+        refreshToken: credentials.refreshToken,
+        accessTokenExpiresAt:
+          credentials.expiresIn > 0
+            ? Date.now() + credentials.expiresIn * 1000
+            : null,
+      });
     },
     setIsAccessChecked(isAccessChecked: boolean) {
       this.isAccessChecked = isAccessChecked;
@@ -113,7 +130,12 @@ export const useAccessStore = defineStore('core-access', {
       this.loginExpired = loginExpired;
     },
     setRefreshToken(token: AccessToken) {
-      this.refreshToken = token;
+      this.syncCredentials();
+      writeStoredCredentials(this, {
+        accessToken: this.accessToken,
+        refreshToken: token,
+        accessTokenExpiresAt: this.accessTokenExpiresAt,
+      });
     },
     unlockScreen() {
       this.isLockScreen = false;

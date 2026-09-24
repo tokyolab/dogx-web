@@ -64,6 +64,20 @@ describe('requestClient', () => {
     });
   });
 
+  it('preserves HTTP status through the axios instance for refresh decisions', async () => {
+    mock.onPost('/auth/refresh').reply(401, { code: 401, message: 'invalid' });
+    await expect(
+      requestClient.instance.post('/auth/refresh'),
+    ).rejects.toMatchObject({
+      response: { status: 401, data: { code: 401 } },
+    });
+    // General callers retain the existing unwrapped business-error contract.
+    await expect(requestClient.post('/auth/refresh')).rejects.toEqual({
+      code: 401,
+      message: 'invalid',
+    });
+  });
+
   it('should successfully upload a file', async () => {
     const fileData = new Blob(['file contents'], { type: 'text/plain' });
 
