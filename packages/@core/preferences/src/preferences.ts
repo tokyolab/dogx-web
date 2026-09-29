@@ -131,12 +131,12 @@ class PreferenceManager {
       this.customPreferencesExtension,
     );
 
-    // 加载缓存的偏好设置，并仅用缓存补齐初始化配置中未显式设置的字段
+    // 用户缓存的偏好设置优先，初始化配置仅补齐缺失字段
     const cachedPreferences = (await this.loadFromCache()) || {};
     const mergedPreference = merge(
       {},
-      this.initialPreferences, // 初始化配置优先，缓存仅补齐缺失字段
-      cachedPreferences,
+      cachedPreferences, // 用户缓存的设置优先
+      this.initialPreferences, // 初始设置仅补齐缺失字段
     );
 
     // 更新偏好设置

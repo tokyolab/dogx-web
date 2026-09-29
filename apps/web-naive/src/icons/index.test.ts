@@ -30,6 +30,7 @@ describe('application offline icons', () => {
     'lucide:user',
     'lucide:settings',
     'lucide:shield-check',
+    'lucide:history',
     'ep:fold',
     'ep:expand',
     'fluent-mdl2:world-clock',

@@ -86,6 +86,46 @@ describe('preferences', () => {
     expect(preferenceManager.getPreferences()).toEqual(expected);
   });
 
+  it('restores cached preferences before defaults and still supports reset', async () => {
+    const cachedPreferences = {
+      app: { locale: 'en-US' },
+      sidebar: { width: 200 },
+      theme: { mode: 'light' },
+    };
+    vi.mocked(localStorage.getItem).mockImplementation((key) =>
+      key === 'restore-preferences'
+        ? JSON.stringify({ value: cachedPreferences })
+        : null,
+    );
+
+    await preferenceManager.initPreferences({
+      namespace: 'restore',
+      overrides: { app: { locale: 'zh-CN', name: 'DogX' } },
+    });
+
+    expect(preferenceManager.getPreferences()).toMatchObject({
+      ...cachedPreferences,
+      app: { locale: 'en-US', name: 'DogX' },
+    });
+    expect(preferenceManager.getPreferences().theme.colorPrimary).toBe(
+      defaultPreferences.theme.colorPrimary,
+    );
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      'restore-preferences-theme',
+      JSON.stringify({ value: 'light' }),
+    );
+
+    await preferenceManager.resetPreferences();
+
+    expect(preferenceManager.getPreferences()).toEqual(
+      preferenceManager.getInitialPreferences(),
+    );
+    expect(preferenceManager.getPreferences().theme.mode).toBe(
+      defaultPreferences.theme.mode,
+    );
+    expect(preferenceManager.getPreferences().app.locale).toBe('zh-CN');
+  });
+
   it('updates theme mode correctly', () => {
     preferenceManager.updatePreferences({
       theme: {

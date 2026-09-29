@@ -25,6 +25,22 @@
     "analytics": "Analytics"
   },
   "system": {
+    "loginLog": {
+      "username": "Username",
+      "usernamePlaceholder": "Enter username",
+      "result": "Login result",
+      "resultPlaceholder": "Select login result",
+      "success": "Success",
+      "failure": "Failure",
+      "ipAddress": "Login IP",
+      "detail": "Details",
+      "userAgent": "Browser / device",
+      "createdAt": "Login time",
+      "loginSuccess": "Login successful",
+      "invalidCredentials": "Incorrect username or password",
+      "accountDisabled": "Account disabled",
+      "systemError": "System error"
+    },
     "dictionary": {
       "listTitle": "Dictionaries",
       "more": "More",
