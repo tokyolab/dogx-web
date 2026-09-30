@@ -155,7 +155,7 @@ const [Grid, gridApi] = useVbenVxeGrid<UserApi.UserItem>({
           options: departmentOptions(departments.value),
           clearable: true,
           filterable: true,
-          placeholder: $t('page.system.user.departmentFilterPlaceholder'),
+          placeholder: $t('common.all'),
         }),
       },
       {
@@ -175,7 +175,7 @@ const [Grid, gridApi] = useVbenVxeGrid<UserApi.UserItem>({
             { label: $t('common.enabled'), value: 1 },
             { label: $t('common.disabled'), value: 0 },
           ],
-          placeholder: $t('page.system.user.allStatuses'),
+          placeholder: $t('common.all'),
         },
         fieldName: 'status',
         label: $t('page.system.user.status'),

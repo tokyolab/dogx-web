@@ -30,7 +30,7 @@ const formOptions = {
           { label: $t('page.system.loginLog.success'), value: 'success' },
           { label: $t('page.system.loginLog.failure'), value: 'failure' },
         ],
-        placeholder: $t('page.system.loginLog.resultPlaceholder'),
+        placeholder: $t('common.all'),
       },
       fieldName: 'result',
       label: $t('page.system.loginLog.result'),

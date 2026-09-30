@@ -116,7 +116,7 @@ const [Grid, gridApi] = useVbenVxeGrid<MenuApi.Item>({
         label: t('status'),
         componentProps: {
           clearable: true,
-          placeholder: $t('ui.placeholder.select'),
+          placeholder: $t('common.all'),
           options: [
             { label: $t('common.enabled'), value: 1 },
             { label: $t('common.disabled'), value: 0 },

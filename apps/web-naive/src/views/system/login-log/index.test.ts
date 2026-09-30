@@ -18,6 +18,12 @@ vi.mock('#/api/system/login-log', () => ({ listLoginLogsApi: mocks.list }));
 vi.mock('#/adapter/vxe-table', () => ({ useVbenVxeGrid: mocks.grid }));
 
 interface Options {
+  formOptions: {
+    schema: {
+      componentProps: { clearable?: boolean; placeholder: string };
+      fieldName: string;
+    }[];
+  };
   gridOptions: {
     columns: { field: string; formatter?: unknown }[];
     proxyConfig: {
@@ -69,6 +75,16 @@ afterEach(() => {
 });
 
 describe('login log list', () => {
+  it('uses the shared all placeholder only for the result filter', () => {
+    expect(
+      options.formOptions.schema.find((field) => field.fieldName === 'result')
+        ?.componentProps,
+    ).toMatchObject({ placeholder: 'common.all', clearable: true });
+    expect(
+      options.formOptions.schema.find((field) => field.fieldName === 'username')
+        ?.componentProps.placeholder,
+    ).toBe('page.system.loginLog.usernamePlaceholder');
+  });
   it.each(['success', 'failure'])(
     'sends %s filter and pagination',
     async (result) => {
