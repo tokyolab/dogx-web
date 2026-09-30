@@ -2,12 +2,14 @@
   "title": "安全设置",
   "login": "登录保护",
   "rateLimit": "请求限流",
-  "rateHelp": "限制同一 IP 的登录请求频率，超出后需等待统计窗口结束。",
+  "rateHelp": "超出后需等待统计窗口结束。",
   "rateEnabled": "开启请求限流",
   "rateWindow": "请求统计时长（秒）",
   "rateMaximum": "窗口内最大请求次数",
+  "rateWindowSuffix": "秒内，同一 IP 最多允许",
+  "rateMaximumSuffix": "次登录请求",
   "failureLock": "失败锁定",
-  "failureHelp": "同一账号连续登录失败达到阈值后暂时禁止登录，超管也适用。不影响已登录会话。",
+  "failureHelp": "按账号锁定，超管也适用，不影响已登录会话。",
   "failureEnabled": "开启失败锁定",
   "failureWindow": "失败统计时长（秒）",
   "failureThreshold": "失败次数阈值",
@@ -17,6 +19,5 @@
   "lockDurationSuffix": "秒",
   "save": "保存",
   "retry": "重新加载",
-  "range": "请输入 {min}～{max} 的整数",
-  "applyHelp": "保存后生效。关闭开关不会清除尚未到期的计数和锁定。"
+  "range": "请输入 {min}～{max} 的整数"
 }

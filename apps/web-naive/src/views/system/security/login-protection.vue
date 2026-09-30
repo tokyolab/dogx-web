@@ -6,7 +6,7 @@ import { onMounted, ref } from 'vue';
 
 import { $t } from '@vben/locales';
 
-import { NButton, NDivider, NSpin } from 'naive-ui';
+import { NButton, NSpin, NSwitch } from 'naive-ui';
 
 import { useVbenForm, z } from '#/adapter/form';
 import { message } from '#/adapter/naive';
@@ -46,20 +46,36 @@ const formOptions = {
 };
 const [RateForm, rateForm] = useVbenForm({
   ...formOptions,
+  wrapperClass: 'flex flex-row flex-wrap items-start gap-x-2',
   schema: [
     {
       component: 'Switch',
       fieldName: 'rateLimitEnabled',
       label: $t('security.rateEnabled'),
+      hideLabel: true,
+      formItemClass: 'w-full',
       componentProps: { class: '' },
       rules: z.boolean(),
     },
-    numberField('rateLimitWindowSeconds', 'rateWindow', 1, 3600),
-    numberField('rateLimitMaxRequests', 'rateMaximum', 1, 10_000),
+    inlineNumberField(
+      'rateLimitWindowSeconds',
+      'rateWindow',
+      1,
+      3600,
+      'rateWindowSuffix',
+    ),
+    inlineNumberField(
+      'rateLimitMaxRequests',
+      'rateMaximum',
+      1,
+      10_000,
+      'rateMaximumSuffix',
+      '6rem',
+    ),
   ],
 });
 
-function lockNumberField(
+function inlineNumberField(
   fieldName: string,
   label: string,
   min: number,
@@ -71,7 +87,11 @@ function lockNumberField(
   return {
     ...field,
     hideLabel: true,
-    formItemClass: 'max-w-full [&_[id$="-form-item-message"]]:static',
+    formItemClass: [
+      'max-w-full',
+      '[&_[id$="-form-item-message"]]:static',
+      '[&_[id$="-form-item-message"]]:leading-5',
+    ].join(' '),
     componentProps: {
       min,
       max,
@@ -94,18 +114,19 @@ const [LockForm, lockForm] = useVbenForm({
       component: 'Switch',
       fieldName: 'failureLockEnabled',
       label: $t('security.failureEnabled'),
+      hideLabel: true,
       formItemClass: 'w-full',
       componentProps: { class: '' },
       rules: z.boolean(),
     },
-    lockNumberField(
+    inlineNumberField(
       'failureWindowSeconds',
       'failureWindow',
       60,
       86_400,
       'failureWindowSuffix',
     ),
-    lockNumberField(
+    inlineNumberField(
       'failureThreshold',
       'failureThreshold',
       1,
@@ -113,7 +134,7 @@ const [LockForm, lockForm] = useVbenForm({
       'failureThresholdSuffix',
       '6rem',
     ),
-    lockNumberField(
+    inlineNumberField(
       'lockDurationSeconds',
       'lockDuration',
       60,
@@ -170,23 +191,45 @@ onMounted(load);
 
 <template>
   <NSpin :show="loading">
-    <div class="w-full max-w-lg">
-      <h3 class="mb-2 text-base font-medium">{{ $t('security.rateLimit') }}</h3>
-      <p class="mb-6 text-sm text-muted-foreground">
-        {{ $t('security.rateHelp') }}
-      </p>
-      <RateForm />
-      <NDivider />
-      <h3 class="mb-2 text-base font-medium">
-        {{ $t('security.failureLock') }}
-      </h3>
-      <p class="mb-6 text-sm text-muted-foreground">
-        {{ $t('security.failureHelp') }}
-      </p>
-      <LockForm />
-      <p class="mb-4 text-sm text-muted-foreground">
-        {{ $t('security.applyHelp') }}
-      </p>
+    <div class="w-full max-w-3xl">
+      <section class="mb-8">
+        <RateForm>
+          <template #rateLimitEnabled="field">
+            <div class="flex items-center gap-3">
+              <h3 class="text-base font-normal">
+                {{ $t('security.rateLimit') }}
+              </h3>
+              <NSwitch
+                :value="field.value"
+                :aria-label="$t('security.rateEnabled')"
+                @update:value="field['onUpdate:value']"
+              />
+            </div>
+          </template>
+        </RateForm>
+        <p class="text-xs text-muted-foreground">
+          {{ $t('security.rateHelp') }}
+        </p>
+      </section>
+      <section class="mb-8">
+        <LockForm>
+          <template #failureLockEnabled="field">
+            <div class="flex items-center gap-3">
+              <h3 class="text-base font-normal">
+                {{ $t('security.failureLock') }}
+              </h3>
+              <NSwitch
+                :value="field.value"
+                :aria-label="$t('security.failureEnabled')"
+                @update:value="field['onUpdate:value']"
+              />
+            </div>
+          </template>
+        </LockForm>
+        <p class="text-xs text-muted-foreground">
+          {{ $t('security.failureHelp') }}
+        </p>
+      </section>
       <NButton v-if="!loading && !ready" @click="load">
         {{ $t('security.retry') }}
       </NButton>

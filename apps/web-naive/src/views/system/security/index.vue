@@ -11,8 +11,8 @@ defineOptions({ name: 'SecuritySettings' });
 
 <template>
   <Page auto-content-height>
-    <NCard>
-      <NTabs default-value="login" type="line" placement="top">
+    <NCard class="h-full" content-class="min-h-0 overflow-y-auto">
+      <NTabs default-value="login" type="line" placement="top" size="large">
         <NTabPane name="login" :tab="$t('security.login')">
           <LoginProtection />
         </NTabPane>
