@@ -1,0 +1,22 @@
+{
+  "title": "Security settings",
+  "login": "Login protection",
+  "rateLimit": "Request rate limit",
+  "rateHelp": "Limit login requests from the same IP. Excess requests must wait until the window expires.",
+  "rateEnabled": "Enable rate limit",
+  "rateWindow": "Request window (seconds)",
+  "rateMaximum": "Maximum requests per window",
+  "failureLock": "Failed login lockout",
+  "failureHelp": "Temporarily block login after repeated failures for an account, including the super administrator. Existing sessions are unaffected.",
+  "failureEnabled": "Enable lockout",
+  "failureWindow": "Failure window (seconds)",
+  "failureThreshold": "Failure threshold",
+  "lockDuration": "Lockout duration (seconds)",
+  "failureWindowSuffix": "second window:",
+  "failureThresholdSuffix": "failed logins, lock for",
+  "lockDurationSuffix": "seconds",
+  "save": "Save",
+  "retry": "Reload",
+  "range": "Enter an integer between {min} and {max}",
+  "applyHelp": "Changes apply after saving. Turning protection off does not clear unexpired counters or locks."
+}
