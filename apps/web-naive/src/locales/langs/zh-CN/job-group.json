@@ -1,0 +1,22 @@
+{
+  "name": "执行器组名称",
+  "discoveryKey": "服务发现 Key",
+  "token": "组 Token",
+  "createdAt": "创建时间",
+  "actions": "操作",
+  "create": "新增执行器组",
+  "detail": "详情",
+  "select": "请选择执行器组",
+  "nameSearch": "请输入组名称",
+  "identityHelp": "执行器配置中的组标识，区分大小写。",
+  "keyHelp": "填写执行器实际注册的 etcd Key。",
+  "immutable": "组名称和服务发现 Key 创建后不可修改；Token 由系统生成，不提供重置。",
+  "show": "显示",
+  "hide": "隐藏",
+  "copy": "复制",
+  "copied": "已复制",
+  "copyFailed": "复制失败，请显示后手动复制",
+  "deleteConfirm": "确定删除执行器组“{name}”？仍被任务或活跃执行记录引用时不能删除。",
+  "discardTitle": "放弃修改",
+  "discard": "未保存的内容将丢失，是否继续？"
+}
