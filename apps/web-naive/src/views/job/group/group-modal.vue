@@ -7,17 +7,13 @@ import { useVbenModal } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 import { formatDateTime } from '@vben/utils';
 
-import {
-  NAlert,
-  NButton,
-  NDescriptions,
-  NDescriptionsItem,
-  NSpace,
-} from 'naive-ui';
+import { NButton, NDescriptions, NDescriptionsItem, NSpace } from 'naive-ui';
 
-import { useVbenForm, z } from '#/adapter/form';
+import { useVbenForm } from '#/adapter/form';
 import { dialog, message } from '#/adapter/naive';
 import { createExecutorGroupApi, getExecutorGroupApi } from '#/api/job/group';
+
+import { groupFormSchema } from './group-form';
 
 interface Data {
   id?: number;
@@ -30,27 +26,11 @@ const ready = ref(false);
 let generation = 0;
 let initial = '';
 const [Form, formApi] = useVbenForm({
+  commonConfig: { componentProps: { class: 'w-full' } },
   layout: 'vertical',
   wrapperClass: 'grid-cols-1',
   showDefaultActions: false,
-  schema: [
-    {
-      component: 'Input',
-      fieldName: 'name',
-      label: $t('job-group.name'),
-      help: $t('job-group.identityHelp'),
-      componentProps: { maxlength: 128 },
-      rules: z.string().min(1).max(128),
-    },
-    {
-      component: 'Input',
-      fieldName: 'discoveryKey',
-      label: $t('job-group.discoveryKey'),
-      help: $t('job-group.keyHelp'),
-      componentProps: { maxlength: 255 },
-      rules: z.string().min(1).max(255),
-    },
-  ],
+  schema: groupFormSchema(),
 });
 async function snapshot() {
   const values = await formApi.getValues<{
@@ -190,9 +170,6 @@ defineExpose(modalApi);
       </NDescriptions>
     </template>
     <template v-else>
-      <NAlert type="info" class="mb-4">
-        {{ $t('job-group.immutable') }}
-      </NAlert>
       <Form />
     </template>
   </Modal>

@@ -8,7 +8,10 @@ import { NButton, NInput, NSpace } from 'naive-ui';
 
 import { previewJobCronApi } from '#/api/job/definition';
 const props = defineProps<{ disabled?: boolean; value?: string }>();
-const emit = defineEmits<{ 'update:value': [value: string] }>();
+const emit = defineEmits<{
+  blur: [event: FocusEvent];
+  'update:value': [value: string];
+}>();
 const loading = ref(false);
 const times = ref<string[]>([]);
 let generation = 0;
@@ -44,6 +47,7 @@ async function preview() {
       :disabled="disabled"
       :maxlength="128"
       placeholder="0 * * * * *"
+      @blur="(event: FocusEvent) => emit('blur', event)"
       @update:value="(value: string) => emit('update:value', value)"
     />
     <NButton

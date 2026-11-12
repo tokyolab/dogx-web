@@ -47,6 +47,20 @@ export function normalizeJobInput(
   };
 }
 export function jobFormSchema(): VbenFormSchema[] {
+  const label = (field: string) => $t(`job-management.${field}`);
+  const required = (field: string) =>
+    $t('ui.formRules.required', [label(field)]);
+  const selected = (field: string) =>
+    $t('ui.formRules.selectRequired', [label(field)]);
+  const requiredText = (field: string, max: number) =>
+    z
+      .string({
+        required_error: required(field),
+        invalid_type_error: required(field),
+      })
+      .trim()
+      .min(1, required(field))
+      .max(max, $t('ui.formRules.maxLength', [label(field), max]));
   const text = (
     fieldName: string,
     max: number,
@@ -54,23 +68,34 @@ export function jobFormSchema(): VbenFormSchema[] {
   ): VbenFormSchema => ({
     component: 'Input',
     fieldName,
-    label: $t(`job-management.${fieldName}`),
+    label: label(fieldName),
     help: help ? $t(`job-management.${help}`) : undefined,
-    componentProps: { maxlength: max },
-    rules: z.string().trim().min(1).max(max),
+    componentProps: { maxlength: max, placeholder: required(fieldName) },
+    rules: requiredText(fieldName, max),
   });
   const number = (
     fieldName: string,
     min: number,
     help: string,
-  ): VbenFormSchema => ({
-    component: 'InputNumber',
-    fieldName,
-    label: $t(`job-management.${fieldName}`),
-    help: $t(`job-management.${help}`),
-    componentProps: { min, max: 2_147_483_647, precision: 0 },
-    rules: z.number().int().min(min).max(2_147_483_647),
-  });
+  ): VbenFormSchema => {
+    const max = 2_147_483_647;
+    const invalid = $t('job-management.integerRange', { min, max });
+    return {
+      component: 'InputNumber',
+      fieldName,
+      label: label(fieldName),
+      help: $t(`job-management.${help}`),
+      componentProps: { min, max, precision: 0 },
+      rules: z
+        .number({
+          required_error: required(fieldName),
+          invalid_type_error: required(fieldName),
+        })
+        .int(invalid)
+        .min(min, invalid)
+        .max(max, invalid),
+    };
+  };
   const select = (
     fieldName: string,
     options: [number, string][],
@@ -84,7 +109,10 @@ export function jobFormSchema(): VbenFormSchema[] {
         label: $t(`job-management.${key}`),
       })),
     },
-    rules: z.number(),
+    rules: z.number({
+      required_error: selected(fieldName),
+      invalid_type_error: selected(fieldName),
+    }),
   });
   return [
     text('name', 128),
@@ -92,7 +120,13 @@ export function jobFormSchema(): VbenFormSchema[] {
       component: markRaw(GroupSelect),
       fieldName: 'executorGroupId',
       label: $t('job-management.executorGroupId'),
-      rules: z.number().int().positive(),
+      rules: z
+        .number({
+          required_error: selected('executorGroupId'),
+          invalid_type_error: selected('executorGroupId'),
+        })
+        .int(selected('executorGroupId'))
+        .positive(selected('executorGroupId')),
     },
     text('processorName', 128, 'processorHelp'),
     select('executionMode', [
@@ -112,9 +146,10 @@ export function jobFormSchema(): VbenFormSchema[] {
     {
       component: markRaw(CronInput),
       fieldName: 'cronExpr',
+      modelPropName: 'value',
       label: $t('job-management.cronExpr'),
       help: $t('job-management.cronHelp'),
-      rules: z.string().trim().min(1).max(128),
+      rules: requiredText('cronExpr', 128),
     },
     {
       component: 'Input',
@@ -146,7 +181,10 @@ export function jobFormSchema(): VbenFormSchema[] {
         maxlength: 500,
         autosize: { minRows: 2, maxRows: 4 },
       },
-      rules: z.string().max(500).optional(),
+      rules: z
+        .string({ invalid_type_error: required('remark') })
+        .max(500, $t('ui.formRules.maxLength', [label('remark'), 500]))
+        .nullish(),
     },
   ];
 }

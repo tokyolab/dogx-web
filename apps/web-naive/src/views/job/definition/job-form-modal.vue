@@ -7,8 +7,6 @@ import { nextTick, ref } from 'vue';
 import { useVbenModal } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
-import { NAlert } from 'naive-ui';
-
 import { useVbenForm } from '#/adapter/form';
 import { dialog, message } from '#/adapter/naive';
 import {
@@ -140,11 +138,6 @@ defineExpose(modalApi);
 </script>
 <template>
   <Modal class="w-[680px]">
-    <NAlert type="info" class="mb-4">
-      {{
-        $t(currentID ? 'job-management.editHelp' : 'job-management.createHelp')
-      }}
-    </NAlert>
     <Form>
       <template #executorGroupId="{ value, handleChange }">
         <GroupSelect
