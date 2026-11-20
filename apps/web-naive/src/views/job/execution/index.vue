@@ -110,8 +110,8 @@ const gridOptions: VxeTableGridOptions<JobExecutionApi.InstanceItem> = {
       query: ({ page }, values) =>
         latestQuery(() =>
           listInstancesApi({
-            createdFrom: timestamp(values.createdFrom),
-            createdTo: timestamp(values.createdTo),
+            createdFrom: timestamp(values.createdRange?.[0]),
+            createdTo: timestamp(values.createdRange?.[1]),
             executorGroupId: positiveID(values.executorGroupId),
             id: positiveID(values.id),
             jobId: positiveID(values.jobId),
@@ -202,15 +202,18 @@ const [Grid, gridApi] = useVbenVxeGrid<JobExecutionApi.InstanceItem>({
       },
       {
         component: 'DatePicker',
-        componentProps: { clearable: true, type: 'datetime' },
-        fieldName: 'createdFrom',
-        label: $t('job-execution.createdFrom'),
-      },
-      {
-        component: 'DatePicker',
-        componentProps: { clearable: true, type: 'datetime' },
-        fieldName: 'createdTo',
-        label: $t('job-execution.createdTo'),
+        componentProps: {
+          clearable: true,
+          defaultTime: ['00:00:00', '00:00:00'],
+          inputReadonly: true,
+          isDateDisabled: isCreatedDateDisabled,
+          isTimeDisabled: isCreatedTimeDisabled,
+          timePickerProps: { actions: ['confirm'], inputReadonly: true },
+          type: 'datetimerange',
+        },
+        fieldName: 'createdRange',
+        formItemClass: 'md:col-span-2',
+        label: $t('job-execution.createdAt'),
       },
     ],
     showCollapseButton: false,
@@ -218,6 +221,50 @@ const [Grid, gridApi] = useVbenVxeGrid<JobExecutionApi.InstanceItem>({
   },
   gridOptions,
 });
+
+function isCreatedDateDisabled(
+  value: number,
+  _position: 'end' | 'start',
+  range: [number, number] | null,
+) {
+  if (range === null) return false;
+  // The range picker supplies the first selected day in both slots while
+  // choosing the second day. Keep that day available for a shorter time range.
+  return (
+    new Date(value).setHours(0, 0, 0, 0) <
+    new Date(range[0]).setHours(0, 0, 0, 0)
+  );
+}
+
+function isCreatedTimeDisabled(
+  value: number,
+  position: 'end' | 'start',
+  range: [number, number],
+) {
+  const selected = new Date(value);
+  const invalid = (hour: number, minute: number, second: number) => {
+    const candidate = new Date(value).setHours(hour, minute, second, 0);
+    return position === 'start' ? candidate >= range[1] : candidate <= range[0];
+  };
+  // Each click retains the other time fields; check the resulting timestamp
+  // so the picker cannot move the opposite endpoint to accommodate it.
+  return {
+    isHourDisabled: (hour: number) =>
+      invalid(hour, selected.getMinutes(), selected.getSeconds()),
+    isMinuteDisabled: (minute: number, hour: null | number) =>
+      invalid(hour ?? selected.getHours(), minute, selected.getSeconds()),
+    isSecondDisabled: (
+      second: number,
+      minute: null | number,
+      hour: null | number,
+    ) =>
+      invalid(
+        hour ?? selected.getHours(),
+        minute ?? selected.getMinutes(),
+        second,
+      ),
+  };
+}
 
 function timestamp(value: unknown) {
   return typeof value === 'number' && Number.isFinite(value)

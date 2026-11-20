@@ -136,6 +136,7 @@ const [Grid, gridApi] = useVbenVxeGrid<JobDefinitionApi.Item>({
         fieldName: 'id',
         label: 'ID',
         componentProps: {
+          showButton: false,
           min: 1,
           max: Number.MAX_SAFE_INTEGER,
           precision: 0,

@@ -4,6 +4,7 @@ import type { JobExecutionApi } from '#/api/job/execution';
 
 import { createApp, defineComponent, h, nextTick, reactive } from 'vue';
 
+import { NDatePicker } from 'naive-ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import ExecutionPage from './index.vue';
@@ -55,6 +56,8 @@ let app: App;
 let container: HTMLDivElement;
 let options: Options;
 let route: { query: { instanceId?: string; jobId?: string } };
+let pickerApp: App | undefined;
+let pickerContainer: HTMLDivElement | undefined;
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -97,9 +100,59 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  pickerApp?.unmount();
+  pickerContainer?.remove();
+  pickerApp = undefined;
+  pickerContainer = undefined;
   app.unmount();
   container.remove();
 });
+
+async function openRangePicker() {
+  const field = options.formOptions.schema.find(
+    (entry) => entry.fieldName === 'createdRange',
+  );
+  if (!field) throw new Error('Creation time range field is missing');
+  const onUpdateValue = vi.fn();
+  pickerContainer = document.createElement('div');
+  document.body.append(pickerContainer);
+  pickerApp = createApp(
+    defineComponent(
+      () => () =>
+        h(NDatePicker, {
+          ...field.componentProps,
+          defaultCalendarStartTime: new Date(2026, 10, 1).getTime(),
+          defaultCalendarEndTime: new Date(2026, 11, 1).getTime(),
+          onUpdateValue,
+          show: true,
+          to: false,
+        }),
+    ),
+  );
+  pickerApp.mount(pickerContainer);
+  await vi.waitFor(() => {
+    expect(document.querySelector('.n-date-panel')).not.toBeNull();
+  });
+  return onUpdateValue;
+}
+
+function calendarDay(day: number) {
+  const cell = [
+    ...document.querySelectorAll<HTMLElement>(
+      '.n-date-panel-calendar--start .n-date-panel-date',
+    ),
+  ].find((item) => item.textContent?.trim() === String(day));
+  if (!cell) throw new Error(`Calendar day ${day} is missing`);
+  return cell;
+}
+
+function rangeConfirm() {
+  const button = document.querySelector<HTMLButtonElement>(
+    '.n-date-panel-actions .n-button--primary-type',
+  );
+  if (!button) throw new Error('Range confirmation button is missing');
+  return button;
+}
 
 describe('execution record list', () => {
   it('uses route Job ID as a filter and opens a linked instance without row requests', async () => {
@@ -122,8 +175,7 @@ describe('execution record list', () => {
     await options.gridOptions.proxyConfig.ajax.query(
       { page: { currentPage: 3, pageSize: 50 } },
       {
-        createdFrom: from,
-        createdTo: to,
+        createdRange: [from, to],
         executorGroupId: 8,
         id: 9,
         jobId: 42,
@@ -159,6 +211,74 @@ describe('execution record list', () => {
     await nextTick();
     expect(mocks.setValues).toHaveBeenCalledWith({ jobId: null });
     expect(mocks.reload).toHaveBeenCalledTimes(1);
+  });
+
+  it('clears both date bounds when the range filter is cleared', async () => {
+    await options.gridOptions.proxyConfig.ajax.query(
+      { page: { currentPage: 1, pageSize: 20 } },
+      { createdRange: null },
+    );
+    expect(mocks.list).toHaveBeenCalledWith(
+      expect.objectContaining({ createdFrom: undefined, createdTo: undefined }),
+    );
+  });
+
+  it('initializes both endpoints at midnight and disables earlier end dates', async () => {
+    const onUpdateValue = await openRangePicker();
+    calendarDay(12).click();
+    await nextTick();
+    expect(calendarDay(11).classList).toContain('n-date-panel-date--disabled');
+    calendarDay(13).dispatchEvent(new MouseEvent('mouseenter'));
+    await nextTick();
+    calendarDay(13).click();
+    await nextTick();
+    expect(rangeConfirm().disabled).toBe(false);
+    rangeConfirm().click();
+    await nextTick();
+    expect(onUpdateValue).toHaveBeenCalledWith(
+      [new Date(2026, 10, 12).getTime(), new Date(2026, 10, 13).getTime()],
+      expect.any(Array),
+    );
+  });
+
+  it('allows the same date but requires a later end time before confirmation', async () => {
+    const onUpdateValue = await openRangePicker();
+    calendarDay(12).click();
+    await nextTick();
+    calendarDay(12).click();
+    await nextTick();
+    expect(rangeConfirm().disabled).toBe(true);
+    expect(onUpdateValue).not.toHaveBeenCalled();
+    const timeInputs = document.querySelectorAll<HTMLInputElement>(
+      '.n-date-panel-header .n-time-picker input',
+    );
+    const endTime = timeInputs[1];
+    if (!endTime) throw new Error('End time input is missing');
+    expect(endTime.value).toBe('00:00:00');
+    expect(endTime.readOnly).toBe(true);
+    endTime.click();
+    await vi.waitFor(() => {
+      expect(document.querySelector('.n-time-picker-panel')).not.toBeNull();
+    });
+    const seconds = document.querySelectorAll<HTMLElement>(
+      '.n-time-picker-col:nth-child(3) .n-time-picker-col__item',
+    );
+    const zero = [...seconds].find((item) => item.textContent === '00');
+    const one = [...seconds].find((item) => item.textContent === '01');
+    if (!zero || !one) throw new Error('Second options are missing');
+    expect(zero.classList).toContain('n-time-picker-col__item--disabled');
+    one.click();
+    await nextTick();
+    expect(rangeConfirm().disabled).toBe(false);
+    rangeConfirm().click();
+    await nextTick();
+    expect(onUpdateValue).toHaveBeenCalledWith(
+      [
+        new Date(2026, 10, 12).getTime(),
+        new Date(2026, 10, 12, 0, 0, 1).getTime(),
+      ],
+      expect.any(Array),
+    );
   });
 
   it('opens the latest route Instance when an earlier close is still pending', async () => {

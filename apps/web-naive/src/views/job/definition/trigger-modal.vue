@@ -107,9 +107,6 @@ defineExpose(modalApi);
 <template>
   <Modal class="w-[620px]" :confirm-text="confirmText">
     <p class="mb-4 font-medium">{{ name }}</p>
-    <NAlert type="info" class="mb-4">
-      {{ $t('job-management.manualHelp') }}
-    </NAlert>
     <NAlert v-if="attempted" type="warning" class="mb-4">
       {{ $t('job-management.retryHelpText') }}
     </NAlert>
